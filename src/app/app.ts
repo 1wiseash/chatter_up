@@ -5,7 +5,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'cu-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.less'
+  styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('chatter-up');
