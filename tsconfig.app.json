@@ -10,7 +10,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/signup-form"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

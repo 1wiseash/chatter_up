@@ -1,6 +1,5 @@
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
-{
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */{
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
@@ -16,14 +15,30 @@
     "module": "preserve",
     "baseUrl": "./",
     "paths": {
-      "@app/*": ["src/app/*"],
-      "@assets/*": ["src/assets/*"],
-      "@directives": ["src/app/_core/directives"],
-      "@env/*": ["src/environments/*"],
-      "@models": ["src/app/_core/models"],
-      "@pipes": ["src/app/_core/pipes"],
-      "@services": ["src/app/_core/services"],
-      "@shared/*": ["src/app/_shared/*"]
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ],
+      "@directives": [
+        "src/app/_core/directives"
+      ],
+      "@env/*": [
+        "src/environments/*"
+      ],
+      "@models": [
+        "src/app/_core/models"
+      ],
+      "@pipes": [
+        "src/app/_core/pipes"
+      ],
+      "@services": [
+        "src/app/_core/services"
+      ],
+      "@shared/*": [
+        "src/app/_shared/*"
+      ]
     }
   },
   "angularCompilerOptions": {

@@ -1,0 +1,49 @@
+<div class="flex min-h-full flex-col items-center px-6 py-8 lg:px-8">
+  <div class="mx-auto w-full max-w-sm">
+    <img src="../../assets/img/logo.svg" alt="Chatter Up!" class="h-[3.5em] mx-auto w-auto" />
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight">Sign in to your Chatter Up! account</h2>
+  </div>
+
+  <div class="mt-6 mx-auto w-full max-w-sm">
+    <form [formGroup]="signinForm" (ngSubmit)="onSubmit()" class="space-y-6 max-w-sm">
+      <z-form-field>
+        <label z-form-label zRequired>Email</label>
+        <z-form-control>
+          <input z-input type="email" placeholder="Enter your email" formControlName="email" />
+          @if (signinForm.get('email')?.invalid && signinForm.get('email')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (signinForm.get('email')?.errors?.['required']) {
+                Email is required.
+            }
+            @if (signinForm.get('email')?.errors?.['email']) {
+                Not a valid email address.
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
+        <label z-form-label zRequired class="inline w-auto m-0 p-0">Password</label>
+        
+        <z-form-control>
+            <input z-input type="password" name="password" required autocomplete="current-password" formControlName="password" />
+            @if (signinForm.get('password')?.invalid && signinForm.get('password')?.touched) {
+                @if (signinForm.get('password')?.errors?.['required']) {
+                    <z-form-message class="text-red-500">Password is required.</z-form-message>
+                }
+            }
+        </z-form-control>
+      </z-form-field>
+
+      <div>
+        <button z-button zType="default" type="submit" [disabled]="signinForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Sign in</button>
+      </div>
+    </form>
+
+    <p class="mt-1 text-center text-sm/6 text-gray-400">
+      Not a member?
+      <a routerLink="/signup" class="font-semibold text-teal-400 hover:text-indigo-300 cursor-pointer">Sign up</a>
+    </p>
+  </div>
+</div>

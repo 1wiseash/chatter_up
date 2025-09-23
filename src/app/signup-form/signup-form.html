@@ -1,0 +1,86 @@
+<div class="flex min-h-full flex-col items-center px-6 py-8 lg:px-8">
+  <div class="mx-auto w-full max-w-sm">
+    <img src="../../assets/img/logo.svg" alt="Chatter Up!" class="h-[3.5em] mx-auto w-auto" />
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight">Create a Chatter Up! account</h2>
+  </div>
+
+  <div class="mt-6 mx-auto w-full max-w-sm">
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <z-form-field>
+        <label z-form-label zRequired>Email</label>
+        <z-form-control>
+          <input z-input type="email" placeholder="Enter your email" formControlName="email" />
+          @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (signupForm.get('email')?.errors?.['required']) {
+                Email is required.
+            }
+            @if (signupForm.get('email')?.errors?.['email']) {
+                Not a valid email address.
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
+        <div class="flex items-center mb-[-8px]">
+          <label z-form-label zRequired class="inline w-auto m-0 p-0">Password</label>
+          <button z-button zType="ghost"  class="inline border-none p-0 m-0 w-auto shadow-none" zPopover zPlacement="top" [zContent]="passwordHelp" zTrigger="hover" zType="outline">
+            <span class="icon-[bx--info-circle] ml-1"></span>
+          </button>
+        </div>
+        
+        <ng-template #passwordHelp>
+          <z-popover class="space-y-1 border-gray-500 bg-gray-100 text-gray-700">
+            <div>
+              <h4 class="font-medium leading-none">Password Requirements</h4>
+              <p class="text-sm text-muted-foreground">Password must be at least 8 characters and contain one or more lowercase, uppercase, number and special character.</p>
+            </div>
+          </z-popover>
+        </ng-template>
+        <z-form-control>
+            <input z-input type="password" name="password" required autocomplete="current-password" formControlName="password" />
+            @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
+                <z-form-message class="text-red-500">
+                @if (signupForm.get('password')?.errors?.['required']) {
+                    Password is required.
+                }
+                @if (signupForm.get('password')?.errors?.['minlength']) {
+                    Password must be at least 8 characters.
+                }
+                @if (signupForm.get('password')?.errors?.['pattern']) {
+                    Password must contain uppercase, lowercase, number, and special character.
+                }
+                </z-form-message>
+            }
+        </z-form-control>
+      </z-form-field>
+
+      <z-form-field>
+        <label z-form-label zRequired class="mb-[-8px]">Confirm Password</label>
+        <z-form-control class="mt-2">
+          <input z-input type="password" name="password-confirm" required formControlName="confirmPassword" />
+          @if (signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched) {
+            @if (signupForm.get('confirmPassword')?.errors?.['required']) {
+                <z-form-message class="text-red-500">Confirm Password is required.</z-form-message>
+            }
+          }
+
+          @if (signupForm.errors?.['PasswordNoMatch'] && signupForm.get('confirmPassword')?.touched) {
+            <z-form-message class="text-red-500">Passwords do not match.</z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+
+      <div>
+        <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Sign up</button>
+      </div>
+    </form>
+
+    <p class="mt-1 text-center text-sm/6 text-gray-400">
+      Already a member?
+      <a routerLink="/signin" class="font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer">Sign in</a>
+    </p>
+  </div>
+</div>

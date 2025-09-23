@@ -23,6 +23,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "^20.2.3",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
@@ -33,17 +34,24 @@
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.1",
     "@tailwindcss/cli": "^4.1.13",
-    "@tailwindcss/postcss": "^4.1.13",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "express": "^5.1.0",
-    "postcss": "^8.5.6",
+    "firebaseui": "^6.1.0",
+    "lucide-static": "^0.544.0",
+    "ngx-sonner": "^3.1.0",
     "rxjs": "~7.8.0",
-    "tailwindcss": "^4.1.13",
+    "tailwind-merge": "^3.3.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^20.3.1",
     "@angular/cli": "^20.3.1",
     "@angular/compiler-cli": "^20.3.0",
+    "@iconify-json/bx": "^1.2.2",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify/tailwind4": "^1.0.6",
+    "@tailwindcss/postcss": "^4.1.13",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
@@ -53,6 +61,9 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.2"
   }
 }

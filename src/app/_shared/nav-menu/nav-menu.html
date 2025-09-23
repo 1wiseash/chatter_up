@@ -1,0 +1,14 @@
+<div class="relative bg-white">
+    <button z-button z-menu zTrigger="hover" [zMenuTriggerFor]="navMenu">
+        <span class="icon-[bx--menu]"></span>
+    </button>
+
+    <ng-template #navMenu>
+        <div z-menu-content class="w-48 bg-white *:hover:bg-teal-500">
+            <button z-menu-item (click)="watchSelected()">Watch</button>
+            <button z-menu-item (click)="practiceSelected()">Practice</button>
+            <button z-menu-item (click)="aboutSelected()">About</button>
+            <button z-menu-item zDisabled (click)="settingsSelected()">Settings</button>
+        </div>
+    </ng-template>
+</div>
