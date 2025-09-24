@@ -2,6 +2,9 @@ import { Routes } from '@angular/router';
 import { LandingPage } from './landing-page/landing-page';
 import { SignupForm } from './signup-form/signup-form';
 import { SigninForm } from './signin-form/signin-form';
+import { HomePage } from './home-page/home-page';
+import { guestGuard } from './_core/guards/guest-guard';
+import { userGuard } from './_core/guards/user-guard';
 
 export const routes: Routes = [
     {
@@ -13,10 +16,18 @@ export const routes: Routes = [
         path: 'signup',
         component: SignupForm,
         title: 'Signup',
+        canActivate: [guestGuard],
     },
     {
         path: 'signin',
         component: SigninForm,
         title: 'Signin',
+        canActivate: [guestGuard],
+    },
+    {
+        path: 'home',
+        component: HomePage,
+        title: 'Home',
+        canActivate: [userGuard],
     },
 ];
