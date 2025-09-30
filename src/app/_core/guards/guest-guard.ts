@@ -4,5 +4,5 @@ import { AuthService } from '@services';
 
 export const guestGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
-  return !authService.authUser ? true : inject(Router).parseUrl('/home');
+  return authService.authUser === null ? true : inject(Router).parseUrl('/home');
 };

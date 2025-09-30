@@ -5,10 +5,15 @@
 
     <ng-template #navMenu>
         <div z-menu-content class="w-48 bg-white *:hover:bg-teal-500">
+            @if (_authService.loggedIn()) {
+                <a routerLink="home" z-menu-item>{{user()?.username}} Home</a>
+            }
             <button z-menu-item (click)="watchSelected()">Watch</button>
             <button z-menu-item (click)="practiceSelected()">Practice</button>
             <button z-menu-item (click)="aboutSelected()">About</button>
-            <button z-menu-item zDisabled (click)="settingsSelected()">Settings</button>
+            @if (_authService.loggedIn()) {
+                <button z-menu-item (click)="logOut()"><span class="icon-[bx--log-out] mr-1"></span>Log out</button>
+            }
         </div>
     </ng-template>
 </div>

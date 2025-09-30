@@ -9,7 +9,7 @@
       <z-form-field>
         <label z-form-label zRequired>Email</label>
         <z-form-control>
-          <input z-input type="email" placeholder="Enter your email" formControlName="email" />
+          <input z-input type="email" placeholder="Enter your email" formControlName="email" autocomplete="email"/>
           @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
             <z-form-message class="text-red-500">
             @if (signupForm.get('email')?.errors?.['required']) {
@@ -24,9 +24,26 @@
       </z-form-field>
       
       <z-form-field>
+        <label z-form-label zRequired>Username</label>
+        <z-form-control>
+          <input z-input type="text" placeholder="Username" formControlName="username" autocomplete="none"/>
+          @if (signupForm.get('username')?.invalid && signupForm.get('username')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (signupForm.get('username')?.errors?.['required']) {
+                Username is required.
+            }
+            @if (signupForm.get('username')?.errors?.['minlength']) {
+                Username must be at least four characters
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
         <div class="flex items-center mb-[-8px]">
           <label z-form-label zRequired class="inline w-auto m-0 p-0">Password</label>
-          <button z-button zType="ghost"  class="inline border-none p-0 m-0 w-auto shadow-none" zPopover zPlacement="top" [zContent]="passwordHelp" zTrigger="hover" zType="outline">
+          <button z-button zType="ghost" tabindex="-1" class="inline border-none p-0 m-0 w-auto shadow-none" zPopover zPlacement="top" [zContent]="passwordHelp" zTrigger="hover" zType="outline">
             <span class="icon-[bx--info-circle] ml-1"></span>
           </button>
         </div>
@@ -40,7 +57,7 @@
           </z-popover>
         </ng-template>
         <z-form-control>
-            <input z-input type="password" name="password" required autocomplete="current-password" formControlName="password" />
+            <input z-input type="password" name="password" required formControlName="password" autocomplete="new-password"/>
             @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
                 <z-form-message class="text-red-500">
                 @if (signupForm.get('password')?.errors?.['required']) {
@@ -60,7 +77,7 @@
       <z-form-field>
         <label z-form-label zRequired class="mb-[-8px]">Confirm Password</label>
         <z-form-control class="mt-2">
-          <input z-input type="password" name="password-confirm" required formControlName="confirmPassword" />
+          <input z-input type="password" name="password-confirm" required formControlName="confirmPassword" autocomplete="off"/>
           @if (signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched) {
             @if (signupForm.get('confirmPassword')?.errors?.['required']) {
                 <z-form-message class="text-red-500">Confirm Password is required.</z-form-message>

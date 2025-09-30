@@ -1,9 +1,16 @@
-<header class="flex items-center mx-2 my-2">
+<header class="flex items-center mx-1 mb-2">
     <h1 routerLink="/" class="text-2xl font-bold text-teal-600 cursor-pointer"><img src="../../assets/img/logo.svg" title="Chatter Up!" alt="Chatter Up!" class="inline h-[1.5em] mt-1 mb-2" />Chatter Up!</h1>
     <div class="flex-1"></div>
-    <a routerLink="/signup" z-button>
-        <span class="hidden md:inline">Sign Up</span>
-    </a>
-    <span routerLink="/signup"  class="mx-1 icon-[bx--user] cursor-pointer"></span>
+    @if (_authService.loggedIn()) {
+        <a routerLink="/home" z-button>
+            <span class="hidden md:inline">Hi {{user()?.username}}</span>
+        </a>
+        <span routerLink="/home"  class="mx-1 icon-[bx--user] cursor-pointer"></span>
+    } @else {
+        <span routerLink="/signin"  class="mx-1 icon-[bx--log-in] cursor-pointer mr-1"></span>
+        <a routerLink="/signin" z-button>
+            <span class="hidden md:inline">Sign in</span>
+        </a>
+    }
     <cu-nav-menu></cu-nav-menu>
 </header>
