@@ -80,4 +80,61 @@
         </div>
         </div>
     </section>
+
+    <!-- Chatter Up! Works block -->
+     <section class="py-20 bg-teal-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Chatter Up! Works</h2>
+          <p class="text-xl text-gray-600">
+            Scientifically designed features to build your conversation confidence in just a few minutes per day
+          </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="text-4xl mb-4">🎯</div>
+              <h3 class="text-xl font-bold text-gray-900 mb-3">Targeted Practice</h3>
+              <p class="text-gray-600">Choose from business, dating, or social scenarios tailored to your goals</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="text-4xl mb-4">⏱️</div>
+              <h3 class="text-xl font-bold text-gray-900 mb-3">5-Minute Sessions</h3>
+              <p class="text-gray-600">Quick, focused practice sessions that fit into your busy schedule</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="text-4xl mb-4">🤖</div>
+              <h3 class="text-xl font-bold text-gray-900 mb-3">AI Conversation Coaches</h3>
+              <p class="text-gray-600">Practice with carefully trained ChatGPT bots that provide realistic responses</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="text-4xl mb-4">📊</div>
+              <h3 class="text-xl font-bold text-gray-900 mb-3">Detailed Analysis</h3>
+              <p class="text-gray-600">Premium members get explanations for every score to accelerate learning</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="text-4xl mb-4">👥</div>
+              <h3 class="text-xl font-bold text-gray-900 mb-3">Guest Access</h3>
+              <p class="text-gray-600">Try it out immediately without creating an account - no barriers to practice</p>
+            </div>
+        </div>
+        
+        <!-- Fixed position CTA box -->
+        @if (user()?.username?.toLowerCase() === "guest") {
+            <div class="fixed bottom-6 right-6 z-50">
+                <div class="flex flex-col items-center bg-white rounded-2xl p-6 shadow-2xl border border-gray-200 max-w-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3 max-w-[175px] text-center">Ready to upgrade your conversations?</h3>
+                    <div class="space-y-3">
+                    <a z-button routerLink="/signup" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm transition-colors">
+                        Create Account
+                    </a>
+                    <a z-button routerLink="/play" class="w-full border-2 border-teal-600 text-teal-600 hover:bg-teal-50 px-6 py-2 rounded-lg font-semibold text-sm transition-colors">
+                        Try as Guest
+                    </a>
+                    </div>
+                </div>
+            </div>
+        }
+      </div>
+    </section>
 </div>

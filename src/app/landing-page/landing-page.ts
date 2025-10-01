@@ -1,15 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NotificationService, SubscriptionService } from '@services';
+import { NotificationService, SubscriptionService, UserService } from '@services';
 import { ZardButtonComponent } from "@app/_shared/components/button/button.component";
 import { ZardFormModule } from '@app/_shared/components/form/form.module';
 import { ZardInputDirective } from '@app/_shared/components/input/input.directive';
 import { toast } from 'ngx-sonner';
 import { ZardCardComponent } from '@app/_shared/components/card/card.component';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'cu-landing-page',
   imports: [
+    RouterLink,
     ZardCardComponent,
     ZardButtonComponent,
     ZardFormModule,
@@ -28,9 +31,13 @@ export class LandingPage {
   authDialogOpen = false;
   readonly _subscriberService = inject(SubscriptionService);
   readonly _notificationService = inject(NotificationService);
+  readonly _userService = inject(UserService);
+
+  // Convert the Observable to a Signal
+  readonly user = toSignal(this._userService.user$);
 
   signupForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', [Validators.required, Validators.email]),
   });
 
   async onSubmit() {
