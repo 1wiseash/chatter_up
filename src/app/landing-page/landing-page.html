@@ -13,14 +13,24 @@
             Whether it's small talk or big, build confidence practicing with AI coaches.
             Practice networking, online dating, and social events in a safe, judgment-free environment.
         </p>
-        <div class="flex items-center">
-            <input type="email" placeholder="Enter email for conversation tips" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            />
-            <button z-button class="ml-1 bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            (click)=subscribe()>
-            Subscribe
-            </button>
-        </div>
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="flex items-center">
+            <z-form-field class="flex-1">
+                <z-form-control>
+                    <input z-input type="email" placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
+                    @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
+                        <z-form-message class="text-red-500">
+                        @if (signupForm.get('email')?.errors?.['required']) {
+                            Email is required.
+                        }
+                        @if (signupForm.get('email')?.errors?.['email']) {
+                            Not a valid email address.
+                        }
+                        </z-form-message>
+                    }
+                </z-form-control>
+            </z-form-field>
+            <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
+        </form>
     </div>
     <img 
         src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
