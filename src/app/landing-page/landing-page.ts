@@ -54,27 +54,4 @@ export class LandingPage {
     }
   }
 
-  readonly steps = [
-    {
-      icon: 'bx--message-rounded-detail',
-      title: "Choose Your Scenario",
-      description: "Select from real-world conversation scenarios tailored to your needs and goals."
-    },
-    {
-      icon: 'Target',
-      title: "Practice with AI",
-      description: "Engage in realistic conversations with our advanced AI that adapts to your responses."
-    },
-    {
-      icon: 'TrendingUp',
-      title: "Get Instant Feedback",
-      description: "Receive detailed analysis and personalized tips to improve your communication skills."
-    },
-    {
-      icon: 'Award',
-      title: "Track Your Progress",
-      description: "Monitor your improvement over time with detailed analytics and achievement badges."
-    }
-  ];
-
 }
