@@ -1,10 +1,11 @@
-<div class="bg-gradient-to-br from-teal-50 to-blue-50 md:flex items-start">
+<div class="bg-gradient-to-br from-teal-50 to-blue-50">
+    <section class="md:flex items-start">
     <img 
         src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
         alt="People having natural conversations"
         class="p-0 shadow-2xl w-[100vw] md:hidden"
         />
-    <div class="w-[100vw] p-1 md:w-[35vw] md:inline-block flex-1">
+        <div class="w-full p-1 md:w-[35vw] md:inline-block flex-1">
         <h1 class="text-3xl sm:text-4xl md:text-5xl md:static font-bold text-gray-900 mb-6">
             Practice Makes Perfect
             <span class="text-teal-600"> Conversations</span>
@@ -13,7 +14,7 @@
             Whether it's small talk or big, build confidence practicing with AI coaches.
             Practice networking, online dating, and social events in a safe, judgment-free environment.
         </p>
-        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="flex items-center">
+            <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="flex items-center mr-2">
             <z-form-field class="flex-1">
                 <z-form-control>
                     <input z-input type="email" placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
@@ -29,7 +30,7 @@
                     }
                 </z-form-control>
             </z-form-field>
-            <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
+                <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md bg-teal-500 mx-1 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
         </form>
     </div>
     <img 
@@ -37,4 +38,6 @@
         alt="People having natural conversations"
         class="hidden shadow-2xl rounded-2xl w-[55vw] mr-2 h-auto md:inline-block"
         />
+    </section>
+
 </div>
