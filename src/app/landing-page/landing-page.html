@@ -1,43 +1,92 @@
 <div class="bg-gradient-to-br from-teal-50 to-blue-50">
     <section class="md:flex items-start">
-    <img 
-        src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
-        alt="People having natural conversations"
-        class="p-0 shadow-2xl w-[100vw] md:hidden"
-        />
+        <img 
+            src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
+            alt="People having natural conversations"
+            class="p-0 shadow-2xl w-[100vw] md:hidden"
+            />
         <div class="w-full p-1 md:w-[35vw] md:inline-block flex-1">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl md:static font-bold text-gray-900 mb-6">
-            Practice Makes Perfect
-            <span class="text-teal-600"> Conversations</span>
-        </h1>
-        <p class="text-xl text-gray-600 mb-8">
-            Whether it's small talk or big, build confidence practicing with AI coaches.
-            Practice networking, online dating, and social events in a safe, judgment-free environment.
-        </p>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl md:static font-bold text-gray-900 mb-6">
+                Practice Makes Perfect
+                <span class="text-teal-600"> Conversations</span>
+            </h1>
+            <p class="text-xl text-gray-600 mb-8">
+                Whether it's small talk or big, build confidence practicing with AI coaches.
+                Practice networking, online dating, and social events in a safe, judgment-free environment.
+            </p>
             <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="flex items-center mr-2">
-            <z-form-field class="flex-1">
-                <z-form-control>
-                    <input z-input type="email" placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
-                    @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
-                        <z-form-message class="text-red-500">
-                        @if (signupForm.get('email')?.errors?.['required']) {
-                            Email is required.
+                <z-form-field class="flex-1">
+                    <z-form-control>
+                        <input z-input type="email" placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
+                        @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
+                            <z-form-message class="text-red-500">
+                            @if (signupForm.get('email')?.errors?.['required']) {
+                                Email is required.
+                            }
+                            @if (signupForm.get('email')?.errors?.['email']) {
+                                Not a valid email address.
+                            }
+                            </z-form-message>
                         }
-                        @if (signupForm.get('email')?.errors?.['email']) {
-                            Not a valid email address.
-                        }
-                        </z-form-message>
-                    }
-                </z-form-control>
-            </z-form-field>
+                    </z-form-control>
+                </z-form-field>
                 <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md bg-teal-500 mx-1 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
-        </form>
-    </div>
-    <img 
-        src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
-        alt="People having natural conversations"
-        class="hidden shadow-2xl rounded-2xl w-[55vw] mr-2 h-auto md:inline-block"
-        />
+            </form>
+        </div>
+        <img 
+            src="https://d64gsuwffb70l.cloudfront.net/68c420a0b789544db45fdcdd_1757683911828_ee65ae84.webp"
+            alt="People having natural conversations"
+            class="hidden shadow-2xl rounded-2xl w-[55vw] mr-2 h-auto md:inline-block"
+            />
     </section>
 
+    <!-- How it works block -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">
+            How It Works
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Transform your conversation skills in four simple steps
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <z-card class="text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="">
+                    <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="w-8 h-8 text-teal-600 icon-[bx--message-rounded-detail]"></span></div>
+                    <div class="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">1</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Choose Your Scenario</h3>
+                    <p class="text-gray-600">Select from real-world conversation scenarios tailored to your needs and goals.</p>
+                </div>
+            </z-card>
+            <z-card class="text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="">
+                    <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="w-8 h-8 text-teal-600 icon-[bx--bot]"></span></div>
+                    <div class="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">2</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Practice with AI</h3>
+                    <p class="text-gray-600">Engage in realistic conversations with our advanced AI that adapts to your responses.</p>
+                </div>
+            </z-card>
+            <z-card class="text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="">
+                    <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="w-8 h-8 text-teal-600 icon-[bx--check-double]"></span></div>
+                    <div class="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">3</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Get Instant Feedback</h3>
+                    <p class="text-gray-600">Receive detailed analysis and personalized tips to improve your communication skills.</p>
+                </div>
+            </z-card>
+            <z-card class="text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="">
+                    <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="w-8 h-8 text-teal-600 icon-[bx--trending-up]"></span></div>
+                    <div class="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">4</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Track Your Progress</h3>
+                    <p class="text-gray-600">Monitor your improvement over time with detailed analytics and achievement badges.</p>
+                </div>
+            </z-card>
+            
+        </div>
+        </div>
+    </section>
 </div>
