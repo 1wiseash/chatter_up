@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc } from "firebase/firestore";
-import { DEFAULT_USER, GUEST_USER, User } from '../models';
+import { DEFAULT_USER, GUEST_USER, MembershipType, User } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -42,6 +42,13 @@ export class UserService {
                 return GUEST_USER;
             }
         }),
+        // tap( async (user) => {
+        //     // Update user record for missing or bad data
+        //     if (this._authService.authUser && (user.membershipLevel === null || user.membershipLevel === undefined)) {
+        //         user.membershipLevel = MembershipType.Free;
+        //         await setDoc(doc(this.db, 'users', this._authService.authUser.uid), user);
+        //     }
+        // }),
         tap( async (user) => {
             this._user.next(user);
             console.log('User data updated to:', this._user.value);

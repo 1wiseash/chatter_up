@@ -1,3 +1,4 @@
+import { MembershipType } from "./membership.models";
 
 export interface AuthData {
     email: string;
@@ -16,6 +17,7 @@ export interface User {
         dating: number[],
         social: number[],
     },
+    membershipLevel?: MembershipType,
 }
 
 export const DEFAULT_USER: User = {
@@ -30,6 +32,7 @@ export const DEFAULT_USER: User = {
         dating: [],
         social: [],
     },
+    membershipLevel: MembershipType.Free,
 }
 
 export const GUEST_USER: User = {
@@ -44,4 +47,5 @@ export const GUEST_USER: User = {
         dating: [],
         social: [],
     },
+    membershipLevel: MembershipType.Free,
 }
