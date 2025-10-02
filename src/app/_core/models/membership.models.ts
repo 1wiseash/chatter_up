@@ -11,7 +11,6 @@ export interface MembershipInfo {
     description: string;
     features: string[];
     popular: boolean;
-    cta: string;
 }
 
 export const MembershipPlans: MembershipInfo[] = [{
@@ -21,7 +20,6 @@ export const MembershipPlans: MembershipInfo[] = [{
         description: 'Play Chatter Up! for free',
         features: ['Unlimited practice sessions', 'Numeric message scoring', 'Access to all environments', 'View greatest hits', 'No account required'],
         popular: false,
-        cta: 'Start Practicing',
     }, {
         id: MembershipType.Paid,
         name: 'Paid',
@@ -29,7 +27,6 @@ export const MembershipPlans: MembershipInfo[] = [{
         description: 'Full access with detailed feedback',
         features: ['Everything in Guest',  'Detailed score explanations', 'Personal progress tracking', 'Conversation history', 'Weekly tips newsletter'],
         popular: true,
-        cta: 'Upgrade to Paid',
     }, {
         id: MembershipType.Premium,
         name: 'Premium',
@@ -37,6 +34,5 @@ export const MembershipPlans: MembershipInfo[] = [{
         description: 'Full access with detailed feedback and coach suggestions',
         features: ['Everything in Basic Member', 'Coach suggestions upon request', 'Conversation Rewinds', 'Invitations to special events', 'Priority support'],
         popular: false,
-        cta: 'Upgrade to Premium',
     }
 ];

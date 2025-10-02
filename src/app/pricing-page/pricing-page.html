@@ -11,32 +11,42 @@
         
         <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           @for (plan of plans; track plan.id) {
-            <div class="rounded-2xl p-8 bg-gray-50 flex flex-col items-center" [class.popular]="plan.popular">
-                @if (plan.popular) {
-                    <div id="most-popular-callout" className="text-center mb-4">
-                        <span className="bg-teal-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                            Most Popular
-                        </span>
-                    </div>
+            <div class="flex flex-col items-center">
+                <div id="most-popular-callout" class="text-center mb-1">
+                  @if (plan.popular) {
+                    <span class="bg-teal-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                      Most Popular
+                    </span>
+                  } @else {
+                    <span class="px-4 py-1 rounded-full text-sm font-semibold invisible">.</span>
+                  }
+                </div>
+              <div class="rounded-2xl p-8 bg-gray-50 flex flex-col items-center grow" [class.popular]="plan.popular">
+                <div class="text-center mb-8">
+                  <h3 class="text-2xl font-bold text-gray-900 mb-2">{{plan.name}}</h3>
+                  <div class="text-4xl font-bold text-teal-600 mb-2">{{plan.monthlyPrice | currency}}/mo.</div>
+                  <p class="text-gray-600">{{plan.description}}</p>
+                </div>
+                
+                <ul class="space-y-3 mb-8">
+                  @for (feature of plan.features; track feature) {
+                      <li class="flex items-center">
+                          <span class="text-teal-600 mr-3">✓</span>
+                          <span class="text-gray-700">{{feature}}</span>
+                      </li>
+                  }
+                </ul>
+                <div class="flex-1"></div>
+                @if (user()?.membershipLevel === plan.id) {
+                  <button z-button disabled class="disabled w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-none text-teal-500">
+                    Current Plan
+                  </button>
+                } @else {
+                  <button z-button [class.popular]="plan.popular" [disabled]="user()?.membershipLevel === plan.id" (click)="upgrade(plan)" class="w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-teal-600 text-teal-600 hover:bg-teal-50">
+                    {{user()?.membershipLevel < plan.id ? 'Upgrade' : 'Downgrade'}} to {{plan.name}}
+                  </button>
                 }
-              <div class="text-center mb-8">
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{plan.name}}</h3>
-                <div class="text-4xl font-bold text-teal-600 mb-2">{{plan.monthlyPrice | currency}}/mo.</div>
-                <p class="text-gray-600">{{plan.description}}</p>
               </div>
-              
-              <ul class="space-y-3 mb-8">
-                @for (feature of plan.features; track feature) {
-                    <li class="flex items-center">
-                        <span class="text-teal-600 mr-3">✓</span>
-                        <span class="text-gray-700">{{feature}}</span>
-                    </li>
-                }
-              </ul>
-              <div class="flex-1"></div>
-              <button z-button [class.popular]="plan.popular" (click)="upgrade(plan.id)" class="w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-teal-600 text-teal-600 hover:bg-teal-50">
-                {{plan.cta}}
-              </button>
             </div>
           }
         </div>

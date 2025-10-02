@@ -1,7 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component } from '@angular/core';
-import { MembershipPlans, MembershipType } from '@models';
+import { Component, inject } from '@angular/core';
+import { MembershipService, UserService } from '@services';
+import { MembershipInfo, MembershipPlans, MembershipType } from '@models';
 import { toast } from 'ngx-sonner';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'cu-pricing-page',
@@ -11,8 +13,14 @@ import { toast } from 'ngx-sonner';
 })
 export class PricingPage {
   readonly plans = MembershipPlans;
+  private readonly _userService = inject(UserService);
+  private readonly _membershipService = inject(MembershipService);
 
-  upgrade(membershipType: MembershipType) {
-    toast('Upgraded to ' + membershipType);
+  // Convert the Observable to a Signal
+  readonly user = toSignal(this._userService.user$);
+
+  async upgrade(plan: MembershipInfo) {
+    const updated = await this._membershipService.purchaseMembership(plan)
+    toast('Upgraded to ' + plan.name);
   }
 }

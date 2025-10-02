@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
-import { getFirestore, collection, setDoc, addDoc, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, setDoc, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { DEFAULT_USER, GUEST_USER, MembershipType, User } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
@@ -71,6 +71,18 @@ export class UserService {
         } catch (e) {
             console.error("Error adding document: ", e);
         }
+    }
+
+    async updateUser(changes: Partial<User>): Promise<void> {
+      if (this._authService.authUser) {
+        const userDocRef = doc(this.db, 'users', this._authService.authUser.uid);
+        await updateDoc(userDocRef, changes);
+        this._updateUserTrigger.next(null);
+        return Promise.resolve();
+      } else {
+        console.error('Tried to update user not currently logged in');
+        return Promise.reject();
+      }
     }
 
     // Get a user with unique id. Doesn't have to be current user.
