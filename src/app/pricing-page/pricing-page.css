@@ -1,0 +1,22 @@
+div.popular {
+    border: 2px;
+    background-color: var(--color-teal-200);
+    border-color: var(--primary);
+}
+
+button.popular {
+    background-color: var(--color-teal-600);
+    color: white;
+}
+
+button.popular:hover {
+    background-color: var(--color-teal-700);
+
+}
+
+#most-popular-callout {
+    position: relative;
+    top: -23px;
+    font-weight: 700;
+    font-style: oblique;
+}

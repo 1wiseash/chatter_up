@@ -1,0 +1,44 @@
+<section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">
+            Simple, Transparent Pricing
+          </h2>
+          <p class="text-xl text-gray-600">
+            Start free, upgrade when you're ready for advanced coaching
+          </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          @for (plan of plans; track plan.id) {
+            <div class="rounded-2xl p-8 bg-gray-50 flex flex-col items-center" [class.popular]="plan.popular">
+                @if (plan.popular) {
+                    <div id="most-popular-callout" className="text-center mb-4">
+                        <span className="bg-teal-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                            Most Popular
+                        </span>
+                    </div>
+                }
+              <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{plan.name}}</h3>
+                <div class="text-4xl font-bold text-teal-600 mb-2">{{plan.monthlyPrice | currency}}/mo.</div>
+                <p class="text-gray-600">{{plan.description}}</p>
+              </div>
+              
+              <ul class="space-y-3 mb-8">
+                @for (feature of plan.features; track feature) {
+                    <li class="flex items-center">
+                        <span class="text-teal-600 mr-3">✓</span>
+                        <span class="text-gray-700">{{feature}}</span>
+                    </li>
+                }
+              </ul>
+              <div class="flex-1"></div>
+              <button z-button [class.popular]="plan.popular" (click)="upgrade(plan.id)" class="w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-teal-600 text-teal-600 hover:bg-teal-50">
+                {{plan.cta}}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </section>

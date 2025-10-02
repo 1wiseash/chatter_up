@@ -5,6 +5,7 @@ import { SigninForm } from './signin-form/signin-form';
 import { HomePage } from './home-page/home-page';
 import { guestGuard } from './_core/guards/guest-guard';
 import { userGuard } from './_core/guards/user-guard';
+import { PricingPage } from './pricing-page/pricing-page';
 
 export const routes: Routes = [
     {
@@ -29,5 +30,10 @@ export const routes: Routes = [
         component: HomePage,
         title: 'Home',
         canActivate: [userGuard],
+    },
+    {
+        path: 'pricing',
+        component: PricingPage,
+        title: 'Pricing',
     },
 ];
