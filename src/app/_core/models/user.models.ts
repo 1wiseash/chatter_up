@@ -17,7 +17,7 @@ export interface User {
         dating: number[],
         social: number[],
     },
-    membershipLevel?: MembershipType,
+    membershipLevel: MembershipType,
 }
 
 export const DEFAULT_USER: User = {

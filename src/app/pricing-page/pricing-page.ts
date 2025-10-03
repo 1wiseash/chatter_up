@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MembershipService, UserService } from '@services';
-import { MembershipInfo, MembershipPlans, MembershipType } from '@models';
+import { MembershipInfo, MembershipPlans, MembershipType, User } from '@models';
 import { toast } from 'ngx-sonner';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -21,6 +21,10 @@ export class PricingPage {
 
   async upgrade(plan: MembershipInfo) {
     const updated = await this._membershipService.purchaseMembership(plan)
-    toast('Upgraded to ' + plan.name);
+    toast('Changed to ' + plan.name);
+  }
+
+  getCallToAction(plan: MembershipInfo): string {
+      return (this._userService.user.membershipLevel < plan.id ? 'Upgrade' : 'Downgrade') + ' to ' + plan.name
   }
 }

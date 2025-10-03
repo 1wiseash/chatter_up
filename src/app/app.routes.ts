@@ -36,4 +36,8 @@ export const routes: Routes = [
         component: PricingPage,
         title: 'Pricing',
     },
+    {
+        path: 'game',
+        loadChildren: () => import('./game/game-module').then(m => m.GameModule),
+    },
 ];
