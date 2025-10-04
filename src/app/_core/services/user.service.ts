@@ -4,7 +4,7 @@ import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { DEFAULT_USER, GUEST_USER, MembershipType, User } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
-import { tap, switchMap, startWith } from 'rxjs/operators';
+import { tap, switchMap, startWith, shareReplay } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import _ from 'lodash';
 
@@ -22,7 +22,7 @@ export class UserService {
             this._authService.authUser$.pipe(startWith(null)),
             this._updateUserTrigger.asObservable().pipe(startWith(null)),
         ]).pipe(
-        tap( ([authUser, _]) => console.log('Auth user changed. About to change user data.', authUser) ),
+        // tap( ([authUser, _]) => console.log('Auth user changed. About to change user data.', authUser) ),
         switchMap( async ([authUser, _]) => {
             if (authUser !== null && authUser.uid !== null && authUser.uid !== '') {
                 const docRef = doc(this.db, "users", authUser.uid);
@@ -42,6 +42,7 @@ export class UserService {
                 return GUEST_USER;
             }
         }),
+        shareReplay(1),
         // tap( async (user) => {
         //     // Update user record for missing or bad data
         //     if (this._authService.authUser && (user.membershipLevel === null || user.membershipLevel === undefined)) {
@@ -51,7 +52,7 @@ export class UserService {
         // }),
         tap( async (user) => {
             this._user.next(user);
-            console.log('User data updated to:', this._user.value);
+            // console.log('User data updated to:', this._user.value);
         }),
     );
 

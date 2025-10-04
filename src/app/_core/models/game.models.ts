@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 
 export enum GameType {
     business,
@@ -36,3 +37,12 @@ export const environments: GameInfo[] = [
       color: 'green'
     }
   ];
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'coach';
+  text: string;
+  score: -2 | -1 | 0 | 1 | 2 | 'flag' | null;
+  explanation?: string;
+  timeInSeconds: number;
+}

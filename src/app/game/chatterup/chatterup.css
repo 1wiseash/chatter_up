@@ -1,0 +1,32 @@
+.score-great {
+    background-color: var(--color-green-500);
+}
+
+.score-good {
+    background-color: var(--color-yellow-500);
+}
+
+.score-meh {
+    background-color: var(--color-gray-500);
+}
+
+.score-bad {
+    background-color: var(--color-orange-500);
+}
+
+.score-horrible {
+    background-color: var(--color-red-500);
+}
+
+.sent-by-user {
+    background-color: var(--color-teal-600);
+    color: white;
+    justify-content: flex-end;
+}
+
+.sent-by-coach {
+    background-color: white;
+    color: var(--color-gray-900);
+    border-width: 1px;
+    justify-content: flex-start;
+}

@@ -33,7 +33,7 @@ export class AuthService {
 
         this._authUser = new BehaviorSubject(this._auth.currentUser);
         this.authUser$ = this._authUser.asObservable().pipe(
-            tap( user => console.log(`Auth user changed:`, user) ),
+            // tap( user => console.log(`Auth user changed:`, user) ),
             shareReplay(1),
         );
 
@@ -45,7 +45,7 @@ export class AuthService {
 
         //Set up a listener to authState just in case you get logged out without hitting logout
         this._auth.onAuthStateChanged( ( authUser => {
-            console.log('onAuthStateChanged. authUser:', authUser);
+            // console.log('onAuthStateChanged. authUser:', authUser);
             this._setAuthUser(authUser);
             this.loggedIn.set(authUser !== null);
         }) );
@@ -111,7 +111,7 @@ export class AuthService {
     private _setAuthUser(authUser: User | null) {
         //Only change auth user if there is actually a change.
         if (!this.loggedIn() && authUser && authUser.uid !== this._authUser.value?.uid) {
-            console.log('Logging in user ' + authUser.uid);
+            // console.log('Logging in user ' + authUser.uid);
             this._authUser.next(authUser);
             if(isPlatformBrowser(this._platformId)) {
                 localStorage.setItem('authUser', JSON.stringify(authUser));
@@ -120,7 +120,7 @@ export class AuthService {
         }
 
         if (this.loggedIn() && !authUser) {
-            console.log('Logging out user ' + this._authUser.value?.uid);
+            // console.log('Logging out user ' + this._authUser.value?.uid);
             this._authUser.next(null);
             if(isPlatformBrowser(this._platformId)) {
                 localStorage.removeItem('authUser');
