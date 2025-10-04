@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { environments, GameInfo } from '@app/_core/models';
+import { environments, GameTypeInfo } from '@app/_core/models';
 import { ZardButtonComponent } from "@app/_shared/components/button/button.component";
 
 @Component({

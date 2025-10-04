@@ -35,11 +35,13 @@ rounded-2xl shadow-2xl flex flex-col">
             <div class="flex"
                     [class.justify-end]="message.sender === 'user'"
                     [class.justify-start]="message.sender === 'coach'">
+                <div>
+                    <p class="text-xs py-1 px-2">{{message.timeSent | date:'mediumTime'}}</p>
                 <div class="max-w-xs px-4 py-3 rounded-lg"
                         [class.sent-by-user]="message.sender === 'user'"
                         [class.sent-by-coach]="message.sender === 'coach'">
                     <p class="text-sm">{{message.text}}</p>
-                    @if (message.score !== null) {
+                    @if (message.scored) {
                         <div class="flex items-center justify-end mt-2">
                             @if (message.explanation) {
                                 <z-badge zPopover [zContent]="popoverContent" zTrigger="hover" zPlacement="bottom" class="text-[1em] bg-white text-teal-500 mr-1">
@@ -66,6 +68,7 @@ rounded-2xl shadow-2xl flex flex-col">
                         </div>
                     }
                 </div>
+                </div>
             </div>
         }
     </div>
@@ -75,7 +78,7 @@ rounded-2xl shadow-2xl flex flex-col">
         <z-form-field class="flex-1">
             <z-form-control>
                 <input z-input placeholder="Type your response..."
-                        formControlName="message" autocomplete="none" [disabled]="timeLeft() === 0"/>
+                        formControlName="message" autocomplete="none"/>
             </z-form-control>
         </z-form-field>
         <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeLeft() === 0"

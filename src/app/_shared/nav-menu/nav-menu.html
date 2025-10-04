@@ -9,7 +9,7 @@
                 <a routerLink="home" z-menu-item>{{user()?.username}} Home</a>
             }
             <button z-menu-item (click)="watchSelected()">Watch</button>
-            <button z-menu-item (click)="practiceSelected()">Practice</button>
+            <a z-menu-item routerLink="/game/lobby">Play Chatter Up!</a>
             <button z-menu-item (click)="aboutSelected()">About</button>
             @if (_authService.loggedIn()) {
                 <button z-menu-item (click)="logOut()"><span class="icon-[bx--log-out] mr-1"></span>Log out</button>
