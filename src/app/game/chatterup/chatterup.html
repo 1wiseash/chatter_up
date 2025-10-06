@@ -1,7 +1,10 @@
 <div class="container mx-auto px-4 pt-6">
-    <h1 class="mt-4 p-4 text-center mb-4 text-3xl font-bold text-blue-700">
+    <h1 class="mt-4 text-center mb-2 text-3xl font-bold text-blue-700">
         Chatter Up for {{chatEnvironmentTitle()}}!
     </h1>
+    <h2 class="text-center mb-6 text-2xl font-bold text-green-600">
+        Scenario: {{game().scenario}}
+    </h2>
 </div>
 <section class="h-[74vh] py-2 bg-gradient-to-br from-blue-50 to-teal-50 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8
 rounded-2xl shadow-2xl flex flex-col">
@@ -10,12 +13,12 @@ rounded-2xl shadow-2xl flex flex-col">
         <!-- Time -->
         <div class="flex items-center space-x-2">
             <span class="text-xl text-gray-500">Time Remaining:</span>
-            @if (timeLeft() > 120) {
-                <span class="text-2xl font-mono font-bold text-green-600">{{formatTime(timeLeft())}}</span>    
-            } @else if (timeLeft() > 60) {
-                <span class="text-2xl font-mono font-bold text-orange-600">{{formatTime(timeLeft())}}</span>    
+            @if (timeRemaining() > 120) {
+                <span class="text-2xl font-mono font-bold text-green-600">{{formatTime(timeRemaining())}}</span>    
+            } @else if (timeRemaining() > 60) {
+                <span class="text-2xl font-mono font-bold text-orange-600">{{formatTime(timeRemaining())}}</span>    
             } @else {
-                <span class="text-2xl font-mono font-bold text-red-600 animate-pulse">{{formatTime(timeLeft())}}</span>
+                <span class="text-2xl font-mono font-bold text-red-600 animate-pulse">{{formatTime(timeRemaining())}}</span>
             }
         </div>
 
@@ -23,7 +26,7 @@ rounded-2xl shadow-2xl flex flex-col">
         <div class="flex items-center space-x-2">
             <span class="text-xl text-gray-500">Score:</span>
             <span class="text-2xl font-bold text-green-600">
-                {{score() > 0 ? '+' : ''}}{{score()}}
+                {{game().score > 0 ? '+' : ''}}{{game().score}}
             </span>
         </div>
 
@@ -31,7 +34,7 @@ rounded-2xl shadow-2xl flex flex-col">
 
     <!-- Messages -->
     <div class="space-y-4 mb-6 h-80 overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
-        @for (message of messages(); track message.id) {
+        @for (message of game().messages; track message.id) {
             <div class="flex"
                     [class.justify-end]="message.sender === 'user'"
                     [class.justify-start]="message.sender === 'coach'">
@@ -43,7 +46,7 @@ rounded-2xl shadow-2xl flex flex-col">
                     <p class="text-sm">{{message.text}}</p>
                     @if (message.scored) {
                         <div class="flex items-center justify-end mt-2">
-                            @if (message.explanation) {
+                            @if (message.explanation !== undefined) {
                                 <z-badge zPopover [zContent]="popoverContent" zTrigger="hover" zPlacement="bottom" class="text-[1em] bg-white text-teal-500 mr-1">
                                     <span class="icon-[bx--comment-detail]"></span>
                                 </z-badge>
@@ -81,7 +84,7 @@ rounded-2xl shadow-2xl flex flex-col">
                         formControlName="message" autocomplete="none"/>
             </z-form-control>
         </z-form-field>
-        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeLeft() === 0"
+        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeRemaining() === 0"
                 class="justify-center rounded-md bg-teal-500 mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">
                     <!-- class="bg-teal-600 hover:bg-teal-700"> -->
             <span class="icon-[bx--mail-send]"></span>

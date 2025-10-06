@@ -57,7 +57,7 @@ export const environments: GameTypeInfo[] = [
     }
   ];
 
-export interface ChatMessage {
+export type ChatMessage = {
   id: string;
   timeSent: Date;
   sender: 'user' | 'coach';
@@ -66,7 +66,9 @@ export interface ChatMessage {
   score: -2 | -1 | 0 | 1 | 2 | -999;
   flagged: boolean;
   explanation?: string;
-}
+};
+
+export type FirestoreChatMessage = Omit<ChatMessage, 'timeSent'> & {timeSent: Timestamp};
 
 export const DEFAULT_CHAT_MESSAGE = {
   id: '',
@@ -78,7 +80,7 @@ export const DEFAULT_CHAT_MESSAGE = {
   flagged: false,
 }
 
-export interface ChatterUpGame {
+export type ChatterUpGame = {
   id: string;
   startTime: Date;
   lastMessageTime: Date;
@@ -91,7 +93,10 @@ export interface ChatterUpGame {
   userId: string;
   username: string;
   userMembershipLevel: MembershipType;
-}
+};
+
+export type FirestoreChatterUpGame = Omit<ChatterUpGame, 'startTime' | 'lastMessageTime' | 'messages'>
+ & {startTime: Timestamp, lastMessageTime: Timestamp, messages: FirestoreChatMessage[]};
 
 export const DEFAULT_CHATTER_UP_GAME: ChatterUpGame = {
   id: '',
@@ -102,7 +107,7 @@ export const DEFAULT_CHATTER_UP_GAME: ChatterUpGame = {
   messages: [],
   score: 0,
   flagged: false,
-  timeLeftInSeconds: 360,
+  timeLeftInSeconds: 600,
   userId: '',
   username: '',
   userMembershipLevel: MembershipType.Free,

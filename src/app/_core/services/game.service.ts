@@ -4,7 +4,7 @@ import { environment } from '@env/environment';
 // import { Timestamp } from 'firebase/firestore';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
-import { ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, GameType, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
+import { ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
 import _ from 'lodash';
@@ -29,7 +29,12 @@ export class GameService {
     readonly _userService = inject(UserService);
     readonly _authService = inject(AuthService);
 
-    currentChatterUpGame: ChatterUpGame = DEFAULT_CHATTER_UP_GAME;
+    private _currentChatterUpGame: BehaviorSubject<ChatterUpGame> = new BehaviorSubject(DEFAULT_CHATTER_UP_GAME);
+    currentChatterUpGame$: Observable<ChatterUpGame> = this._currentChatterUpGame.asObservable();
+    get currentChatterUpGame() {
+        return _.cloneDeep(this._currentChatterUpGame.value);
+    }
+
 
     getGamesCollectionPath() {
         return GAMES_COLLECTION;
@@ -37,27 +42,29 @@ export class GameService {
 
     getGamePath(): string {
         const root = this.getGamesCollectionPath();
-        if (this.currentChatterUpGame.id === '') {
+        if (this._currentChatterUpGame.value.id === '') {
             console.error('No current game');
-            return `/${root}/0`;
+            return `${root}/0`;
         }
-        return `/${root}/${this.currentChatterUpGame.id}`
+        return `${root}/${this._currentChatterUpGame.value.id}`
     }
 
     async startChatterUp(environment: GameType): Promise<boolean> {
+        const currentChatterUpGame = _.cloneDeep(this._currentChatterUpGame.value);
+
         // 1. Prepare the data to save to server
-        this.currentChatterUpGame.startTime = new Date();
-        this.currentChatterUpGame.lastMessageTime = this.currentChatterUpGame.startTime;
-        this.currentChatterUpGame.type = environment;
-        this.currentChatterUpGame.userId = this._authService.uid as string;
-        this.currentChatterUpGame.username = this._userService.user.username;
-        this.currentChatterUpGame.userMembershipLevel = this._userService.user.membershipLevel;
+        currentChatterUpGame.startTime = new Date();
+        currentChatterUpGame.lastMessageTime = currentChatterUpGame.startTime;
+        currentChatterUpGame.type = environment;
+        currentChatterUpGame.userId = this._authService.uid as string;
+        currentChatterUpGame.username = this._userService.user.username;
+        currentChatterUpGame.userMembershipLevel = this._userService.user.membershipLevel;
         const scenarios = environments[environment].scenarios;
-        this.currentChatterUpGame.scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+        currentChatterUpGame.scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
 
         try {
             // 2. Add the document. This returns a DocumentReference instantly.
-            const docRef = await addDoc(collection(this.db, this.getGamesCollectionPath()), this.currentChatterUpGame);
+            const docRef = await addDoc(collection(this.db, this.getGamesCollectionPath()), currentChatterUpGame);
             console.log(`Game successfully added with temporary ID: ${docRef.id}`);
 
             // 3. Retrieve the full snapshot to get the data as saved by Firestore
@@ -76,7 +83,8 @@ export class GameService {
             //     ? retrievedData.createdAt.toDate() 
             //     : retrievedData.createdAt;
 
-            this.currentChatterUpGame.id = docSnapshot.id;
+            currentChatterUpGame.id = docSnapshot.id;
+            this._currentChatterUpGame.next(currentChatterUpGame);
             return Promise.resolve(true);
         } catch (error) {
             console.error("Error creating game record:", error);
@@ -85,10 +93,12 @@ export class GameService {
     }
 
     async sendMessage(message: string): Promise<boolean> {
-        if (this.currentChatterUpGame.id === '') return Promise.resolve(false);
+        if (this._currentChatterUpGame.value.id === '') return Promise.resolve(false);
 
-        const elapsedTimeInSeconds = (new Date().valueOf() - this.currentChatterUpGame.lastMessageTime.valueOf())/1000;
-        this.currentChatterUpGame.lastMessageTime = new Date();
+        const now = new Date();
+        const currentChatterUpGame = _.cloneDeep(this._currentChatterUpGame.value);
+
+        const elapsedTimeInSeconds = currentChatterUpGame.messages.length === 0 ? 0 : (now.valueOf() - currentChatterUpGame.lastMessageTime.valueOf())/1000;
 
         let score: -2 | -1 | 0 | 1 | 2 | -999 = 0;
         let explanation: string | undefined = undefined;
@@ -101,29 +111,75 @@ export class GameService {
         }
         const newUserMessage: ChatMessage = {
             ...DEFAULT_CHAT_MESSAGE,
-            id: this.currentChatterUpGame.id + this.currentChatterUpGame.lastMessageTime.valueOf(),
+            id: currentChatterUpGame.id + '_user_' + now.valueOf(),
             sender: 'user',
-            timeSent: this.currentChatterUpGame.lastMessageTime,
+            timeSent: now,
             text: message,
             scored: true,
             score,
             flagged: score === -999,
         };
-        if (explanation) newUserMessage.explanation = explanation;
-        this.currentChatterUpGame.messages.push(newUserMessage);
-        response && this.currentChatterUpGame.messages.push(response as ChatMessage);
+        if (explanation !== undefined) newUserMessage.explanation = explanation;
+        currentChatterUpGame.messages.push(newUserMessage);
+        response && currentChatterUpGame.messages.push(response as ChatMessage);
+        currentChatterUpGame.lastMessageTime = response ? response.timeSent : newUserMessage.timeSent;
 
-        this.currentChatterUpGame.flagged ||= newUserMessage.flagged;
-        this.currentChatterUpGame.score += score;
-        this.currentChatterUpGame.timeLeftInSeconds -= elapsedTimeInSeconds;
+        currentChatterUpGame.flagged ||= newUserMessage.flagged;
+        currentChatterUpGame.score += score;
+        currentChatterUpGame.timeLeftInSeconds -= elapsedTimeInSeconds;
 
         try {
-            const result = await setDoc(doc(this.db, this.getGamePath()), this.currentChatterUpGame);
+            const result = await setDoc(doc(this.db, this.getGamePath()), currentChatterUpGame);
+            const docSnapshot = await getDoc(doc(this.db, this.getGamePath()));
+            if (docSnapshot.exists()) {
+                const firestoreGame = docSnapshot.data() as FirestoreChatterUpGame;
+                const game = this.getGameFromFirestoreGame(firestoreGame);
+                this._currentChatterUpGame.next(game);
+            } else {
+                console.error("Data didn't get stored for some reason:", docSnapshot, 'Using local version.');
+                this._currentChatterUpGame.next(currentChatterUpGame);
+            }
         } catch (error) {
             console.error('Error saving message:', error);
             return Promise.reject();
         }
         return Promise.resolve(true);
+    }
+
+    getGameFromFirestoreGame(fsGame: FirestoreChatterUpGame): ChatterUpGame {
+        const game: ChatterUpGame = {
+            id: fsGame.id,
+            startTime: this.convertDate(fsGame.startTime),
+            lastMessageTime: this.convertDate(fsGame.lastMessageTime),
+            type: fsGame.type,
+            scenario: fsGame.scenario,
+            messages: [],
+            score: fsGame.score,
+            flagged: fsGame.flagged,
+            timeLeftInSeconds: fsGame.timeLeftInSeconds,
+            userId: fsGame.userId,
+            username: fsGame.username,
+            userMembershipLevel: fsGame.userMembershipLevel,
+        };
+        for (let m of fsGame.messages) {
+            const message: ChatMessage = {
+                id: m.id,
+                timeSent: this.convertDate(m.timeSent),
+                sender: m.sender,
+                text: m.text,
+                scored: m.scored,
+                score: m.score,
+                flagged: m.flagged,
+            };
+            if (m.explanation !== undefined) message.explanation = m.explanation;
+            game.messages.push(message);
+        }
+        return game;
+    }
+    
+    convertDate(timestamp: Timestamp): Date {
+            // Convert Firestore Timestamp object back to a JS Date object for external use
+        return timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
     }
 
     // FAKER FUNCTIONS
@@ -137,7 +193,7 @@ export class GameService {
         if (words.includes('interesting') || words.includes('fascinating')) {score += 1; explanation += 'Included a keyword. ';}
         if (words.includes('tell me') || words.includes('how') || words.includes('what') || words.includes('why')) {
             score += 1;
-            explanation += 'Included a open-ended question. ';
+            explanation += 'Included an open-ended question. ';
         }
         if (words.length >= 50 && words.length < 200) {score += 1; explanation += 'Good length. ';}
         if (words.length >= 200 && words.length < 400) {score -= 1; explanation += 'Response too long. ';}
@@ -149,7 +205,7 @@ export class GameService {
         // Clamp response
         score = Math.max(-2, Math.min(2, score));
         if (this.currentChatterUpGame.userMembershipLevel === MembershipType.Free) explanation = undefined;
-        const response = this.getFakeCoachMessage();
+        const response = await this.getFakeCoachMessage();
 
         return new Promise((resolve) => {
             // Simulate network delay
@@ -160,7 +216,7 @@ export class GameService {
         });
     };
 
-    getFakeCoachMessage() {
+    async getFakeCoachMessage(): Promise<ChatMessage> {
         const responses = [
             "That sounds really interesting! I'd love to hear more about what you're working on.",
             "Wow, that's impressive! How did you get started in that field?",
@@ -169,17 +225,24 @@ export class GameService {
             "Fascinating! Are you working on any exciting projects right now?"
         ];
 
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        const newBotMessage: ChatMessage = {
-            ...DEFAULT_CHAT_MESSAGE,
-            timeSent: new Date(),
-            sender: 'coach',
-            text: randomResponse,
-            scored: false,
-            score: 0,
-        };
-        newBotMessage.id = this.currentChatterUpGame.id + newBotMessage.timeSent.valueOf();
-        return newBotMessage;
+        return new Promise((resolve) => {
+            // Simulate network delay
+            setTimeout(() => {
+                // Resolve the promise, returning the data
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                const newBotMessage: ChatMessage = {
+                    ...DEFAULT_CHAT_MESSAGE,
+                    timeSent: new Date(),
+                    sender: 'coach',
+                    text: randomResponse,
+                    scored: false,
+                    score: 0,
+                };
+                newBotMessage.id = this.currentChatterUpGame.id + '_coach_' + newBotMessage.timeSent.valueOf();
+                resolve(newBotMessage);
+            }, Math.random() * 3000);
+        });
     }
 
 }
