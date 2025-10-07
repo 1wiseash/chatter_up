@@ -36,6 +36,9 @@
       "@services": [
         "src/app/_core/services"
       ],
+      "@guards": [
+        "src/app/_core/guards"
+      ],
       "@shared/*": [
         "src/app/_shared/*"
       ]

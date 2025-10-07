@@ -1,6 +1,8 @@
 import { Timestamp } from "firebase/firestore";
 import { MembershipType } from "./membership.models";
 
+export const CHATTER_UP_GAME_DURATION = 60000;
+
 export enum GameType {
     business,
     dating,
@@ -89,7 +91,7 @@ export type ChatterUpGame = {
   messages: ChatMessage[];
   score: number;
   flagged: boolean;
-  timeLeftInSeconds: number;
+  timeRemaining: number;
   userId: string;
   username: string;
   userMembershipLevel: MembershipType;
@@ -107,7 +109,7 @@ export const DEFAULT_CHATTER_UP_GAME: ChatterUpGame = {
   messages: [],
   score: 0,
   flagged: false,
-  timeLeftInSeconds: 600,
+  timeRemaining: CHATTER_UP_GAME_DURATION,
   userId: '',
   username: '',
   userMembershipLevel: MembershipType.Free,

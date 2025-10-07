@@ -7,7 +7,7 @@ import { getFirestore, collection, setDoc, addDoc, doc, getDoc, Timestamp } from
 import { ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
-import _ from 'lodash';
+import _, { times } from 'lodash';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 
@@ -35,6 +35,15 @@ export class GameService {
         return _.cloneDeep(this._currentChatterUpGame.value);
     }
 
+    private _gameRunning: BehaviorSubject<boolean> = new BehaviorSubject(false);
+    gameRunning$ = this._gameRunning.asObservable();
+    get gameRunning() { return this._gameRunning.value; }
+    set gameRunning(running: boolean) { this._gameRunning.next(running); }
+
+    get gameActive(): boolean {
+        return this._currentChatterUpGame.value.id !== '';
+    }
+
 
     getGamesCollectionPath() {
         return GAMES_COLLECTION;
@@ -50,7 +59,7 @@ export class GameService {
     }
 
     async startChatterUp(environment: GameType): Promise<boolean> {
-        const currentChatterUpGame = _.cloneDeep(this._currentChatterUpGame.value);
+        const currentChatterUpGame = DEFAULT_CHATTER_UP_GAME;
 
         // 1. Prepare the data to save to server
         currentChatterUpGame.startTime = new Date();
@@ -92,13 +101,15 @@ export class GameService {
         }
     }
 
-    async sendMessage(message: string): Promise<boolean> {
+    endChatterUp() {
+        this._gameRunning.next(false);
+    }
+
+    async sendMessage(message: string, elapsedTime: number): Promise<boolean> {
         if (this._currentChatterUpGame.value.id === '') return Promise.resolve(false);
 
-        const now = new Date();
+        if (!this._gameRunning.value) this._gameRunning.next(true);
         const currentChatterUpGame = _.cloneDeep(this._currentChatterUpGame.value);
-
-        const elapsedTimeInSeconds = currentChatterUpGame.messages.length === 0 ? 0 : (now.valueOf() - currentChatterUpGame.lastMessageTime.valueOf())/1000;
 
         let score: -2 | -1 | 0 | 1 | 2 | -999 = 0;
         let explanation: string | undefined = undefined;
@@ -109,16 +120,18 @@ export class GameService {
             console.error('Error scoring message:', error);
             return Promise.reject();
         }
+        const timeSent =  new Date(this._currentChatterUpGame.value.lastMessageTime.valueOf() + elapsedTime);
         const newUserMessage: ChatMessage = {
             ...DEFAULT_CHAT_MESSAGE,
-            id: currentChatterUpGame.id + '_user_' + now.valueOf(),
+            id: currentChatterUpGame.id + '_user_' + timeSent,
             sender: 'user',
-            timeSent: now,
+            timeSent,
             text: message,
             scored: true,
             score,
             flagged: score === -999,
         };
+        
         if (explanation !== undefined) newUserMessage.explanation = explanation;
         currentChatterUpGame.messages.push(newUserMessage);
         response && currentChatterUpGame.messages.push(response as ChatMessage);
@@ -126,7 +139,7 @@ export class GameService {
 
         currentChatterUpGame.flagged ||= newUserMessage.flagged;
         currentChatterUpGame.score += score;
-        currentChatterUpGame.timeLeftInSeconds -= elapsedTimeInSeconds;
+        currentChatterUpGame.timeRemaining -= elapsedTime;
 
         try {
             const result = await setDoc(doc(this.db, this.getGamePath()), currentChatterUpGame);
@@ -156,7 +169,7 @@ export class GameService {
             messages: [],
             score: fsGame.score,
             flagged: fsGame.flagged,
-            timeLeftInSeconds: fsGame.timeLeftInSeconds,
+            timeRemaining: fsGame.timeRemaining,
             userId: fsGame.userId,
             username: fsGame.username,
             userMembershipLevel: fsGame.userMembershipLevel,
@@ -188,7 +201,7 @@ export class GameService {
         let score = 0;
         let explanation: string | undefined = '';
         
-        if (words.includes('screw')) return {score: -999, explanation: 'Flagged for language', response: null};
+        if (words.includes('screw')) {score: -999; explanation: 'Flagged for language'}
         if (words.includes('?')) {score += 2; explanation += 'Included a question. ';}
         if (words.includes('interesting') || words.includes('fascinating')) {score += 1; explanation += 'Included a keyword. ';}
         if (words.includes('tell me') || words.includes('how') || words.includes('what') || words.includes('why')) {

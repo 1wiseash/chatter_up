@@ -34,7 +34,7 @@ rounded-2xl shadow-2xl flex flex-col">
 
     <!-- Messages -->
     <div class="space-y-4 mb-6 h-80 overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
-        @for (message of game().messages; track message.id) {
+        @for (message of chatMessages(); track message.id) {
             <div class="flex"
                     [class.justify-end]="message.sender === 'user'"
                     [class.justify-start]="message.sender === 'coach'">
@@ -84,7 +84,7 @@ rounded-2xl shadow-2xl flex flex-col">
                         formControlName="message" autocomplete="none"/>
             </z-form-control>
         </z-form-field>
-        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeRemaining() === 0"
+        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeRemaining() <= 0"
                 class="justify-center rounded-md bg-teal-500 mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">
                     <!-- class="bg-teal-600 hover:bg-teal-700"> -->
             <span class="icon-[bx--mail-send]"></span>

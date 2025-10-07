@@ -12,6 +12,7 @@ import { ChatMessage, GameTypeInfo, GameType, environments, ChatterUpGame } from
 import { GameService } from '@services';
 import { toast } from 'ngx-sonner';
 import _ from 'lodash';
+import { ZardAlertDialogService } from '@app/_shared/components/alert-dialog/alert-dialog.service';
 
 @Component({
   selector: 'cu-chatterup',
@@ -30,10 +31,39 @@ import _ from 'lodash';
 })
 export class Chatterup {
   private readonly _gameService = inject(GameService);
+  private alertDialogService = inject(ZardAlertDialogService);
+
   game: Signal<ChatterUpGame> = toSignal(this._gameService.currentChatterUpGame$) as Signal<ChatterUpGame>;
+  gameRunning = toSignal(this._gameService.gameRunning$) as Signal<boolean>;
 
   chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game().type)?.title);
-  timeRemaining = computed( () => this.game().timeLeftInSeconds );
+
+  elapsedTime = signal(0);
+  timer: NodeJS.Timeout | undefined = undefined;
+  timeRemaining = computed( () => {
+    const t = this.game().timeRemaining - this.elapsedTime();
+    if (t <= 0) {
+      clearInterval(this.timer);
+      this._gameService.endChatterUp();
+      this.alertDialogService.confirm({
+        zTitle: 'Game Over',
+        zDescription: `You scored ${this.game().score} points!`,
+        zOkText: 'Continue',
+        zCancelText: undefined,
+      });
+    }
+    return t;
+  });
+
+  lastMessageCount = 0;
+  chatMessages: Signal<ChatMessage[]> = computed( () => {
+    const messages = this.game().messages;
+    if (messages.length === 0 || messages.length !== this.lastMessageCount) {
+      this.timer = setInterval( () => this.elapsedTime.set(this.elapsedTime() + 1000), 1000);
+      this.lastMessageCount = messages.length;
+    }
+    return messages;
+  });
 
   messageForm = new FormGroup({
     message: new FormControl('', [Validators.required]),
@@ -41,13 +71,17 @@ export class Chatterup {
 
   async onSubmit() {
     if (this.messageForm.value?.message) {
+      // Stop the countdown so user doesn't feel cheated by slow network access
+      clearInterval(this.timer);
+
       // Send message to backend
-      toast.promise(this._gameService.sendMessage(this.messageForm.value.message), {
+      toast.promise(this._gameService.sendMessage(this.messageForm.value.message, this.elapsedTime()), {
         loading: 'Submitting message...',
         success: (data: any) => {
           this.messageForm.patchValue({message: ''});
           this.messageForm.markAsUntouched();
-          return `Game updated.`;
+          this.elapsedTime.set(0);
+          return `New response.`;
         },
         error: (error: any) => {
           console.error('Error sending message to backend:', error);
@@ -59,13 +93,12 @@ export class Chatterup {
     }
   }
 
-  formatTime(seconds: number) {
-    const negative = seconds < 0;
-    seconds = Math.abs(seconds);
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
+  formatTime(miliseconds: number) {
+    const negative = miliseconds < 0;
+    miliseconds = Math.abs(miliseconds);
+    const mins = Math.floor(miliseconds / 60000);
+    const secs = Math.round((miliseconds / 1000) % 60);
     return `${negative ? '-' : ''}${mins}:${secs.toString().padStart(2, '0')}`;
   }
-
 
 }
