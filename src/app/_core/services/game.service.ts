@@ -4,10 +4,10 @@ import { environment } from '@env/environment';
 // import { Timestamp } from 'firebase/firestore';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
-import { ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
+import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
-import _, { times } from 'lodash';
+import _ from 'lodash';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 
@@ -51,11 +51,6 @@ export class GameService {
     getGamePath(gameId?: string): string {
         const root = this.getGamesCollectionPath();
         if (!gameId) gameId = this._currentChatterUpGame.value.id;
-        
-        if (this._currentChatterUpGame.value.id === '') {
-            console.error('No current game');
-            return `${root}/0`;
-        }
         return `${root}/${gameId}`
     }
 
@@ -88,7 +83,7 @@ export class GameService {
         currentChatterUpGame.userId = this._authService.uid as string;
         currentChatterUpGame.username = this._userService.user.username;
         currentChatterUpGame.userMembershipLevel = this._userService.user.membershipLevel;
-        const scenarios = environments[environment].scenarios;
+        const scenarios = (_.find(environments, (e) => e.id === environment) as GameTypeInfo).scenarios;
         currentChatterUpGame.scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
 
         try {
@@ -114,6 +109,13 @@ export class GameService {
 
             currentChatterUpGame.id = docSnapshot.id;
             this._currentChatterUpGame.next(currentChatterUpGame);
+
+            // 5. Save game id to user's record and increment game count
+            const games = this._userService.user.chatterUpGames;
+            games.push(currentChatterUpGame.id);
+            const stats = this._userService.user.chatterUpStats;
+            stats.gameCounts[currentChatterUpGame.type]++;
+            this._userService.updateUser({chatterUpGames: games, chatterUpStats: stats});
             return Promise.resolve(true);
         } catch (error) {
             console.error("Error creating game record:", error);
@@ -121,8 +123,35 @@ export class GameService {
         }
     }
 
-    endChatterUp() {
+    async endChatterUp() {
         this._gameRunning.next(false);
+
+        // Update user stats
+        const stats = this._userService.user.chatterUpStats;
+        stats.bestScores[this._currentChatterUpGame.value.type] = Math.max(stats.bestScores[this._currentChatterUpGame.value.type], this._currentChatterUpGame.value.score);
+        stats.totalScores[this._currentChatterUpGame.value.type] += this._currentChatterUpGame.value.score;
+
+        if (this._userService.user.chatterUpGames.length === 0) {
+            stats.streakDays[this._currentChatterUpGame.value.type] = 1;
+        } else {
+            let streakExtended = false;
+            for (let gameId of this._userService.user.chatterUpGames) {
+                try {
+                    const game = await this.getGame(gameId);
+                    if (game.type === this._currentChatterUpGame.value.type) {
+                        if (this._currentChatterUpGame.value.startTime.valueOf() - game.startTime.valueOf() < 1000 * 60 * 60 * 24) {
+                            streakExtended = true;
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('May have computed streak days incorrectly');
+                }
+            }
+            stats.streakDays[this._currentChatterUpGame.value.type] = streakExtended ? stats.streakDays[this._currentChatterUpGame.value.type] + 1 : 0;
+        }
+        // NOTE: Game count was updated when game started
+        this._userService.updateUser({chatterUpStats: stats});
     }
 
     async sendMessage(message: string, elapsedTime: number): Promise<boolean> {
@@ -213,6 +242,38 @@ export class GameService {
     convertDate(timestamp: Timestamp): Date {
             // Convert Firestore Timestamp object back to a JS Date object for external use
         return timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+    }
+
+
+    async getAchievements(user: User): Promise<Achievement[]> {
+        const achievements: Achievement[] = [];
+        const currentUser = this._userService.user;
+        
+        achievements.push({name: `First Words`, description: `Complete your first conversation`, icon: ``, earned: user.chatterUpGames.length > 0});
+        achievements.push({name: `Now You're Talking`, description: `Complete ten conversations`, icon: ``, earned: user.chatterUpGames.length > 9});
+        
+        const gameCounts = {business: 0, dating: 0, social: 0};
+        for (let gameId of user.chatterUpGames) {
+            const game = await this.getGame(gameId);
+            if (game.type === GameType.business) gameCounts.business++;
+            else if (game.type === GameType.dating) gameCounts.dating++;
+            else gameCounts.social++;
+        }
+        achievements.push({name: `Talkin' Business`, description: `Complete a business conversation`, icon: ``, earned: gameCounts.business > 0});
+        achievements.push({name: `Networking Pro`, description: `Complete 10 business conversations`, icon: ``, earned: gameCounts.business > 9});
+        achievements.push({name: `Let's Talk`, description: `Complete a dating conversation`, icon: ``, earned: gameCounts.dating > 0});
+        achievements.push({name: `Dating Dynamo`, description: `Complete 10 dating conversations`, icon: ``, earned: gameCounts.dating > 9});
+        achievements.push({name: `Party Talk`, description: `Complete a social conversation`, icon: ``, earned: gameCounts.social > 0});
+        achievements.push({name: `Life of the Party`, description: `Complete 10 social conversations`, icon: ``, earned: gameCounts.social > 9});
+        achievements.push({name: `Networking Ninja`, description: `Score 20+ in a business conversation`, icon: ``, earned: user.chatterUpStats.bestScores.business >= 20});
+        achievements.push({name: `Networking Master`, description: `Average 20+ in business conversations`, icon: ``, earned: user.chatterUpStats.totalScores.business / user.chatterUpStats.gameCounts.business >= 20});
+        achievements.push({name: `Beyond 'Hey'`, description: `Score 20+ in a dating conversation`, icon: ``, earned: user.chatterUpStats.bestScores.dating >= 20});
+        achievements.push({name: `Dating Guru`, description: `Average 20+ in dating conversations`, icon: ``, earned: user.chatterUpStats.totalScores.dating / user.chatterUpStats.gameCounts.dating >= 20});
+        achievements.push({name: `Social Butterfly`, description: `Score 20+ in a social conversation`, icon: ``, earned: user.chatterUpStats.bestScores.social >= 20});
+        achievements.push({name: `Socialite`, description: `Average 20+ in social conversations`, icon: ``, earned: user.chatterUpStats.totalScores.social / user.chatterUpStats.gameCounts.social >= 20});
+        achievements.push({name: `The Conversationalist`, description: `Practice chatting 3 days in a row`, icon: ``, earned: Math.max(user.chatterUpStats.streakDays.business, user.chatterUpStats.streakDays.dating, user.chatterUpStats.streakDays.social) >= 3});
+        achievements.push({name: `Talk Marathoner`, description: `Practice chatting 7 days in a row`, icon: ``, earned: Math.max(user.chatterUpStats.streakDays.business, user.chatterUpStats.streakDays.dating, user.chatterUpStats.streakDays.social) >= 7});
+        return Promise.resolve(achievements);
     }
 
     // FAKER FUNCTIONS

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { DEFAULT_USER, GUEST_USER, MembershipType, User } from '../models';
+import { Achievement, DEFAULT_USER, GUEST_USER, MembershipType, User } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith, shareReplay } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -29,7 +29,7 @@ export class UserService {
                 try {
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
-                        console.log("Document data:", docSnap.data());
+                        // console.log("Document data:", docSnap.data());
                         return docSnap.data() as User;
                     } else {
                         console.log("No such document!");

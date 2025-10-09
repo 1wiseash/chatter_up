@@ -5,7 +5,7 @@
             Your ChatterUp Dashboard
           </h2>
           <p class="text-xl text-gray-600">
-            Track your progress and see how your conversation skills are improving
+            Membership Level: {{user().membershipLevel | membershipLevel}}
           </p>
         </div>
 
@@ -18,71 +18,52 @@
                 <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.business ? user().chatterUpStats.totalScores.business / user().chatterUpStats.gameCounts.business : 0}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.business}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.business}}</div>
+                <div class="text-center mb-4">
+                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                    {{user().chatterUpStats.totalScores.business | currentSkillLevel}}
+                  </z-badge>
+                </div>
+                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.business | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+                <div class="text-sm text-gray-600 text-center">
+                  {{user().chatterUpStats.totalScores.business | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.business | nextSkillLevel}}
+                </div>
               </z-card>
               <z-card  class="p-4 text-center" zTitle="Dating">
                 <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.dating}}</div>
                 <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.dating ? user().chatterUpStats.totalScores.dating / user().chatterUpStats.gameCounts.dating : 0}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.dating}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.dating}}</div>
+                <div class="text-center mb-4">
+                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                    {{user().chatterUpStats.totalScores.dating | currentSkillLevel}}
+                  </z-badge>
+                </div>
+                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.dating | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+                <div class="text-sm text-gray-600 text-center">
+                  {{user().chatterUpStats.totalScores.dating | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.dating | nextSkillLevel}}
+                </div>
               </z-card>
               <z-card  class="p-4 text-center" zTitle="Social">
                 <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.social}}</div>
                 <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.social ? user().chatterUpStats.totalScores.social / user().chatterUpStats.gameCounts.social : 0}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.social}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.social}}</div>
+                <div class="text-center mb-4">
+                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                    {{user().chatterUpStats.totalScores.social | currentSkillLevel}}
+                  </z-badge>
+                </div>
+                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.social | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+                <div class="text-sm text-gray-600 text-center">
+                  {{user().chatterUpStats.totalScores.social | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.social | nextSkillLevel}}
+                </div>
               </z-card>
             </div>
 
-            <!-- Recent Sessions -->
-            <z-card zTitle="Recent Practice Sessions">
-                <div class="space-y-3">
-                  @for (game of recentGames(); track game.id) {
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div class="flex items-center space-x-3">
-                        <z-badge>
-                          {{getGameTypeDescription(game.type)}}
-                        </z-badge>
-                        <span class="text-sm text-gray-600">{{game.startTime | date:'short'}}</span>
-                      </div>
-                      <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">{{game.scenario}}</span>
-                        <span class="font-bold text-red-600"
-                          [class.text-green-600]="game.score >= 15" 
-                          [class.text-yellow-600]="game.score >= 5">
-                          +{{game.score}}
-                        </span>
-                      </div>
-                    </div>
-                  }
-                </div>
-                <button z-button zType="outline" class="w-full mt-4">
-                  View All Sessions
-                </button>
-            </z-card>
-          </div>
-
-          <!-- Sidebar -->
-          <div class="space-y-8">
-            <!-- Level Progress -->
-            <z-card zTitle="Level Progress" class="text-center">
-                <div class="text-center mb-4">
-                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-2">
-                    {{userStats.level}}
-                  </z-badge>
-                </div>
-                <cu-progress-bar [percentage]="65" [height]="14" class="mb-2"></cu-progress-bar>
-                <div class="text-sm text-gray-600 text-center">
-                  65% to {{userStats.nextLevel}}
-                </div>
-                <p class="text-xs text-gray-500 mt-2 text-center">
-                  Complete 8 more conversations to level up!
-                </p>
-            </z-card>
-
             <!-- Achievements -->
             <z-card zTitle="Achievements" class="text-center">
-                <div class="space-y-3">
-                  @for (achievement of achievements; track $index) {
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  @for (achievement of achievements(); track achievement.name) {
                     <div class="p-3 rounded-lg border bg-gray-50 border-gray-200" 
                             [class.bg-green-50]="achievement.earned"
                             [class.border-green-200]="achievement.earned">
@@ -102,7 +83,37 @@
                       </div>
                     </div>
                   }
+              </div>
+            </z-card>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-8">
+            <!-- Recent Sessions -->
+            <z-card zTitle="Recent Practice Sessions" class="text-center">
+                <div class="space-y-3">
+                  @for (game of recentGames(); track game.id) {
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div class="flex items-center space-x-3">
+                        <z-badge>
+                          {{game.type | gameType}}
+                        </z-badge>
+                        <span class="text-sm text-gray-600">{{game.startTime | date:'short'}}</span>
+                      </div>
+                      <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">{{game.scenario}}</span>
+                        <span class="font-bold text-red-600"
+                          [class.text-green-600]="game.score >= 15" 
+                          [class.text-yellow-600]="game.score >= 5">
+                          +{{game.score}}
+                        </span>
+                      </div>
+                    </div>
+                  }
                 </div>
+                <button z-button zType="outline" class="w-full mt-4">
+                  View All Sessions
+                </button>
             </z-card>
           </div>
         </div>

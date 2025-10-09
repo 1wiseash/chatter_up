@@ -6,6 +6,15 @@ export interface AuthData {
     password: string;
 }
 
+export enum SkillLevel {
+    Novice = 0,
+    Beginner = 100,
+    Intermediate = 500,
+    Advanced = 1000,
+    Expert = 2000,
+    Genius = 5000,
+}
+
 export interface User {
     username: string;
     chatterUpGames: string[];
