@@ -44,18 +44,38 @@ export class GameService {
         return this._currentChatterUpGame.value.id !== '';
     }
 
-
     getGamesCollectionPath() {
         return GAMES_COLLECTION;
     }
 
-    getGamePath(): string {
+    getGamePath(gameId?: string): string {
         const root = this.getGamesCollectionPath();
+        if (!gameId) gameId = this._currentChatterUpGame.value.id;
+        
         if (this._currentChatterUpGame.value.id === '') {
             console.error('No current game');
             return `${root}/0`;
         }
-        return `${root}/${this._currentChatterUpGame.value.id}`
+        return `${root}/${gameId}`
+    }
+
+    async getGame(gameId: string): Promise<ChatterUpGame> {
+        const docRef = doc(this.db, this.getGamePath(gameId));
+
+        try {
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+                const firestoreGame = docSnapshot.data() as FirestoreChatterUpGame;
+                const game = this.getGameFromFirestoreGame(firestoreGame);
+                return Promise.resolve(game);
+            } else {
+                console.error(`Could not find game with id ${gameId}:`, docSnapshot);
+                return Promise.reject();
+            }
+        } catch (error) {
+            console.error(`Error trying to find game with id ${gameId}:`, error);
+            return Promise.reject();
+        }
     }
 
     async startChatterUp(environment: GameType): Promise<boolean> {
