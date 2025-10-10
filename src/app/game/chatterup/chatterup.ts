@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, Signal, signal } from '@angular/core';
+import { AfterViewChecked, Component, computed, ElementRef, inject, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,10 +9,11 @@ import { ZardFormModule } from '@app/_shared/components/form/form.module';
 import { ZardInputDirective } from '@app/_shared/components/input/input.directive';
 import { ZardPopoverComponent, ZardPopoverDirective } from '@app/_shared/components/popover/popover.component';
 import { ChatMessage, GameTypeInfo, GameType, environments, ChatterUpGame } from '@models';
-import { GameService } from '@services';
+import { GameService, UserService } from '@services';
 import { toast } from 'ngx-sonner';
 import _ from 'lodash';
 import { ZardAlertDialogService } from '@app/_shared/components/alert-dialog/alert-dialog.service';
+import { GameOverComponent } from '../game-over.component/game-over.component';
 
 @Component({
   selector: 'cu-chatterup',
@@ -29,8 +30,12 @@ import { ZardAlertDialogService } from '@app/_shared/components/alert-dialog/ale
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'
 })
-export class Chatterup {
+export class Chatterup implements AfterViewChecked {
+  @ViewChild('messagesContainer') messagesContainerRef!: ElementRef;
+  @ViewChildren('messageRef') messageRefs!: QueryList<ElementRef>;
+
   private readonly _gameService = inject(GameService);
+  private readonly _userService = inject(UserService);
   private alertDialogService = inject(ZardAlertDialogService);
 
   game: Signal<ChatterUpGame> = toSignal(this._gameService.currentChatterUpGame$) as Signal<ChatterUpGame>;
@@ -44,13 +49,12 @@ export class Chatterup {
     const t = this.game().timeRemaining - this.elapsedTime();
     if (t <= 0) {
       clearInterval(this.timer);
-      this._gameService.endChatterUp();
       this.alertDialogService.confirm({
-        zTitle: 'Game Over',
-        zDescription: `You scored ${this.game().score} points!`,
-        zOkText: 'Continue',
-        zCancelText: undefined,
+        zContent: GameOverComponent,
+        zData: {user: this._userService.user, game: this.game()},
+        zOkText: 'Close'
       });
+      this._gameService.endChatterUp();
     }
     return t;
   });
@@ -62,12 +66,23 @@ export class Chatterup {
       this.timer = setInterval( () => this.elapsedTime.set(this.elapsedTime() + 1000), 1000);
       this.lastMessageCount = messages.length;
     }
+
+    // Scroll last message into view once they have had a chance to be updated
+    setTimeout( () => {
+      if (this.messageRefs && this.messageRefs.last) {
+        this.messageRefs.last.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }, 1)
     return messages;
   });
 
   messageForm = new FormGroup({
     message: new FormControl('', [Validators.required]),
   });
+
+  ngAfterViewChecked() {
+    // Scroll to the last item after the view has been updated
+  }
 
   async onSubmit() {
     if (this.messageForm.value?.message) {
