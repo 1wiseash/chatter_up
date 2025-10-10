@@ -248,7 +248,7 @@ export class GameService {
     async getAchievements(user: User): Promise<Achievement[]> {
         const achievements: Achievement[] = [];
         const currentUser = this._userService.user;
-        
+
         achievements.push({name: `First Words`, description: `Complete your first conversation`, icon: ``, earned: user.chatterUpGames.length > 0});
         achievements.push({name: `Now You're Talking`, description: `Complete ten conversations`, icon: ``, earned: user.chatterUpGames.length > 9});
         
@@ -261,7 +261,7 @@ export class GameService {
         }
         achievements.push({name: `Talkin' Business`, description: `Complete a business conversation`, icon: ``, earned: gameCounts.business > 0});
         achievements.push({name: `Networking Pro`, description: `Complete 10 business conversations`, icon: ``, earned: gameCounts.business > 9});
-        achievements.push({name: `Let's Talk`, description: `Complete a dating conversation`, icon: ``, earned: gameCounts.dating > 0});
+        achievements.push({name: `Dating Dabbler`, description: `Complete a dating conversation`, icon: ``, earned: gameCounts.dating > 0});
         achievements.push({name: `Dating Dynamo`, description: `Complete 10 dating conversations`, icon: ``, earned: gameCounts.dating > 9});
         achievements.push({name: `Party Talk`, description: `Complete a social conversation`, icon: ``, earned: gameCounts.social > 0});
         achievements.push({name: `Life of the Party`, description: `Complete 10 social conversations`, icon: ``, earned: gameCounts.social > 9});

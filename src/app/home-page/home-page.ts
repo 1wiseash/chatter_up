@@ -15,6 +15,7 @@ import {
     CurrentSkillLevelPipe,
     NextSkillLevelPipe,
 } from '@pipes';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'cu-home-page',
@@ -30,6 +31,7 @@ import {
     PercentageToNextSkillLevel,
     CurrentSkillLevelPipe,
     NextSkillLevelPipe,
+    RouterLink,
   ],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css'

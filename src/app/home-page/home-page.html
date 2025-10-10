@@ -5,7 +5,7 @@
             Your ChatterUp Dashboard
           </h2>
           <p class="text-xl text-gray-600">
-            Membership Level: {{user().membershipLevel | membershipLevel}}
+            Membership Level: <a routerLink="/pricing" class="underline text-blue-600">{{user().membershipLevel | membershipLevel}}</a>
           </p>
         </div>
 
@@ -62,7 +62,7 @@
 
             <!-- Achievements -->
             <z-card zTitle="Achievements" class="text-center">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   @for (achievement of achievements(); track achievement.name) {
                     <div class="p-3 rounded-lg border bg-gray-50 border-gray-200" 
                             [class.bg-green-50]="achievement.earned"
@@ -88,20 +88,22 @@
           </div>
 
           <!-- Sidebar -->
-          <div class="space-y-8">
+          <div class="md:col-span-2 lg:col-span-1 space-y-8">
             <!-- Recent Sessions -->
             <z-card zTitle="Recent Practice Sessions" class="text-center">
                 <div class="space-y-3">
                   @for (game of recentGames(); track game.id) {
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div class="flex items-center space-x-3">
-                        <z-badge>
+                    <div class="flex items-center justify-between bg-gray-50 rounded-lg">
+                      <div class="flex items-center space-x-2">
+                        <z-badge class="bg-blue-600 text-white"
+                            [class.bg-orange-600]="game.type === 'dating'"
+                            [class.bg-purple-600]="game.type === 'social'">
                           {{game.type | gameType}}
                         </z-badge>
-                        <span class="text-sm text-gray-600">{{game.startTime | date:'short'}}</span>
+                        <span class="text-sm text-gray-600">{{game.startTime | date:'M/d'}}</span>
+                        <span class="text-sm text-gray-600">{{game.scenario}}</span>
                       </div>
                       <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">{{game.scenario}}</span>
                         <span class="font-bold text-red-600"
                           [class.text-green-600]="game.score >= 15" 
                           [class.text-yellow-600]="game.score >= 5">
