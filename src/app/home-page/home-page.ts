@@ -46,7 +46,7 @@ export class HomePage implements OnInit {
 
     async ngOnInit() {
         const games: ChatterUpGame[] = [];
-        for (let gameId of this.user().chatterUpGames) {
+        for (let gameId of this.user().chatterUpGames.slice(-10).reverse()) {
             try {
                 const game: ChatterUpGame = await this._gameService.getGame(gameId);
                 games.push(game);
