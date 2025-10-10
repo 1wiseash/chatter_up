@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Achievement, ChatterUpGame, GameType, SkillLevel, User } from '@models';
@@ -32,6 +32,7 @@ import { RouterLink } from '@angular/router';
     CurrentSkillLevelPipe,
     NextSkillLevelPipe,
     RouterLink,
+    DecimalPipe,
   ],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css'
@@ -57,6 +58,21 @@ export class HomePage implements OnInit {
         this.recentGames.set(games);
 
         this.achievements.set(await this._gameService.getAchievements(this._userService.user));
+    }
+
+    async showMoreGames(gameCount: number) {
+        const games: ChatterUpGame[] = this.recentGames();
+        gameCount = Math.min(gameCount, this.user().chatterUpGames.length);
+
+        for (let gameId of this.user().chatterUpGames.slice(-gameCount, gameCount - games.length).reverse()) {
+            try {
+                const game: ChatterUpGame = await this._gameService.getGame(gameId);
+                games.push(game);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        this.recentGames.set(games);
     }
 
 }

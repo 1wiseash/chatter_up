@@ -108,3 +108,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
  
+z-alert-dialog {
+    background-color: white;
+    border: 1px solid black;
+}

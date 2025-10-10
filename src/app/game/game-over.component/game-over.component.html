@@ -1,0 +1,14 @@
+<div class="flex flex-col text-center m-3">
+    <h1 class="text-4xl font-black my-3">Game Over</h1>
+    <div class="mb-4">
+        <span class="text-2xl text-teal-600">Score: {{game.score}}</span>
+    </div>
+    @if(game.score > avgScore) {
+        <div class="text-xl text-red-600">You did better than your average!</div>
+    }
+    <div class="text-xl mb-6">Previous Average Score: {{avgScore | number:'1.1-2'}}</div>
+    @if(game.score >= bestScore) {
+        <div class="text-xl text-red-600">You beat your best score!</div>
+    }
+    <div class="text-xl mb-4">Previous Best Score: {{bestScore}}</div>
+</div>

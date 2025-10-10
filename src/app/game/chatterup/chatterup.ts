@@ -49,10 +49,10 @@ export class Chatterup implements AfterViewChecked {
     const t = this.game().timeRemaining - this.elapsedTime();
     if (t <= 0) {
       clearInterval(this.timer);
-      this.alertDialogService.confirm({
+      this.alertDialogService.info({
         zContent: GameOverComponent,
         zData: {user: this._userService.user, game: this.game()},
-        zOkText: 'Close'
+        zOkText: 'Close',
       });
       this._gameService.endChatterUp();
     }

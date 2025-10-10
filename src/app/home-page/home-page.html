@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <z-card  class="p-4 text-center" zTitle="Business">
                 <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.business}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.business ? user().chatterUpStats.totalScores.business / user().chatterUpStats.gameCounts.business : 0}}</div>
+                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.business ? user().chatterUpStats.totalScores.business / user().chatterUpStats.gameCounts.business : 0) | number:'1.1-2'}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.business}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.business}}</div>
                 <div class="text-center mb-4">
@@ -30,7 +30,7 @@
               </z-card>
               <z-card  class="p-4 text-center" zTitle="Dating">
                 <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.dating}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.dating ? user().chatterUpStats.totalScores.dating / user().chatterUpStats.gameCounts.dating : 0}}</div>
+                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.dating ? user().chatterUpStats.totalScores.dating / user().chatterUpStats.gameCounts.dating : 0) | number:'1.1-2'}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.dating}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.dating}}</div>
                 <div class="text-center mb-4">
@@ -45,7 +45,7 @@
               </z-card>
               <z-card  class="p-4 text-center" zTitle="Social">
                 <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.social}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{user().chatterUpStats.gameCounts.social ? user().chatterUpStats.totalScores.social / user().chatterUpStats.gameCounts.social : 0}}</div>
+                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.social ? user().chatterUpStats.totalScores.social / user().chatterUpStats.gameCounts.social : 0) | number:'1.1-2'}}</div>
                 <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.social}}</div>
                 <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.social}}</div>
                 <div class="text-center mb-4">
@@ -107,14 +107,14 @@
                         <span class="font-bold text-red-600"
                           [class.text-green-600]="game.score >= 15" 
                           [class.text-yellow-600]="game.score >= 5">
-                          +{{game.score}}
+                          {{game.score > 0 ? '+' : ''}}{{game.score}}
                         </span>
                       </div>
                     </div>
                   }
                 </div>
-                <button z-button zType="outline" class="w-full mt-4">
-                  View All Sessions
+                <button z-button (click)="showMoreGames(recentGames().length + 10)" zType="outline" class="w-full mt-4">
+                  View More Games
                 </button>
             </z-card>
           </div>
