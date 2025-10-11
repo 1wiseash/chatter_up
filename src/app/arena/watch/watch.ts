@@ -83,6 +83,7 @@ export class Watch implements OnInit {
     }
         
     play() {
+        console.log('play clicked');
         if (this.currentMove() >= (this.game.messages.length - 1)) {
             this.playing.set(false);
             return;
@@ -112,6 +113,7 @@ export class Watch implements OnInit {
     }
 
     advance(steps: number) {
+        console.log('advance clicked');
         this.currentMove.update( move => Math.max(-1, Math.min(move + steps, this.game.messages.length)) );
 
         // Scroll last message into view once they have had a chance to be updated

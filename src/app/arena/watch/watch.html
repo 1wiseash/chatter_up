@@ -74,17 +74,20 @@ rounded-2xl shadow-2xl flex flex-col">
                 </div>
             </div>
         }
+        @if(currentMove() >= (game.messages.length - 1)) {
+            <div class="text-center">--- End of Game ---</div>
+        }
         <div #scrollAnchor></div>
     </div>
 
     <!-- Game Controls -->
     <div class="flex place-content-center space-x-2">
-        <button (click)="advance(-1000)" title="Rewind to beginning" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--rewind]"></span></button>
-        <button (click)="advance(-1)" title="Step back" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--skip-previous]"></span></button>
-        @if(playing()) {<button (click)="pause()" title="Pause" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--pause]"></span></button>}
-        @else {<button (click)="play()" title="Play" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--play]"></span></button>}
-        <button (click)="advance(1)" title="Step forward" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--skip-next]"></span></button>
-        <button (click)="advance(1000)" title="Fast-forward to end" class="w-10 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--fast-forward]"></span></button>
-        <button (click)="toggleSpeed()" title="Change speed" class="flex items-center h-12 cursor-pointer hover:scale-120"><span class="text-2xl h-12 icon-[bx--run]"></span><span class="">x{{PLAY_SPEEDS[currentPlaySpeedIndex()]}}</span></button>
+        <button (click)="advance(-1000)" [disabled]="playing() || currentMove() < 0" title="Rewind to beginning" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--rewind]"></span></button>
+        <button (click)="advance(-1)" [disabled]="playing() || currentMove() < 0" title="Step back" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--skip-previous]"></span></button>
+        @if(playing()) {<button (click)="pause()" title="Pause" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--pause]"></span></button>}
+        @else {<button (click)="play()" [disabled]="currentMove() >= (game.messages.length - 1)" title="Play" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--play]"></span></button>}
+        <button (click)="advance(1)" [disabled]="playing() || currentMove() >= (game.messages.length - 1)" title="Step forward" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--skip-next]"></span></button>
+        <button (click)="advance(1000)" [disabled]="playing() || currentMove() >= (game.messages.length - 1)" title="Fast-forward to end" class="w-10 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-4xl h-12 w-12 icon-[bx--fast-forward]"></span></button>
+        <button (click)="toggleSpeed()" title="Change speed" class="flex items-center h-12 disabled:text-gray-400 cursor-pointer hover:scale-120"><span class="text-2xl h-12 icon-[bx--run]"></span><span class="">x{{PLAY_SPEEDS[currentPlaySpeedIndex()]}}</span></button>
     </div>
 </section>
