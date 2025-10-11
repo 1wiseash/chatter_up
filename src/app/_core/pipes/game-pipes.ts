@@ -6,7 +6,7 @@ import { GameType } from '@models';
 })
 export class GameTypePipe implements PipeTransform {
 
-  transform(value: GameType): string {
+  transform(value: GameType | 'business' | 'dating' | 'social'): string {
     return GameType[value];
   }
 

@@ -9,13 +9,13 @@ import { ZardCardComponent } from '@shared/components/card/card.component';
 import { ProgressBar } from '@shared/progress-bar/progress-bar';
 import {
     MembershipLevelPipe,
-    GameTypePipe,
     PointsToNextSkillLevelPipe,
     PercentageToNextSkillLevel,
     CurrentSkillLevelPipe,
     NextSkillLevelPipe,
 } from '@pipes';
 import { RouterLink } from '@angular/router';
+import { GameTypeComponent } from '@shared/game-type/game-type';
 
 @Component({
   selector: 'cu-home-page',
@@ -25,7 +25,7 @@ import { RouterLink } from '@angular/router';
     ZardButtonComponent,
     ProgressBar,
     DatePipe,
-    GameTypePipe,
+    GameTypeComponent,
     MembershipLevelPipe,
     PointsToNextSkillLevelPipe,
     PercentageToNextSkillLevel,

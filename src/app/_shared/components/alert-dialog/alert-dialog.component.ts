@@ -27,7 +27,7 @@ import { ZardButtonComponent } from '../button/button.component';
 import { ZardAlertDialogService } from './alert-dialog.service';
 import { ZardAlertDialogRef } from './alert-dialog-ref';
 import { mergeClasses } from '@shared/utils/merge-classes';
-import { UniqueIdService } from '@app/_shared/utils/unique-ids';
+import { UniqueIdService } from '@shared/utils/unique-ids';
 
 const noopFun = () => void 0;
 export type OnClickCallback<T> = (instance: T) => false | void | object;

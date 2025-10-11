@@ -1,0 +1,5 @@
+<z-badge class="bg-blue-600 text-white"
+    [class.bg-orange-600]="gameType === 'dating'"
+    [class.bg-green-600]="gameType === 'social'">
+    {{gameType | gameType}}
+</z-badge>

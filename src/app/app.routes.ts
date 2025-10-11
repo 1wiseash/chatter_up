@@ -40,4 +40,8 @@ export const routes: Routes = [
         path: 'game',
         loadChildren: () => import('./game/game-module').then(m => m.GameModule),
     },
+    {
+        path: 'arena',
+        loadChildren: () => import('./arena/arena-module').then(m => m.ArenaModule),
+    },
 ];

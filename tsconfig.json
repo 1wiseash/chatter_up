@@ -15,9 +15,6 @@
     "module": "preserve",
     "baseUrl": "./",
     "paths": {
-      "@app/*": [
-        "src/app/*"
-      ],
       "@assets/*": [
         "src/assets/*"
       ],
@@ -38,6 +35,9 @@
       ],
       "@guards": [
         "src/app/_core/guards"
+      ],
+      "@util": [
+        "src/app/_core/util"
       ],
       "@shared/*": [
         "src/app/_shared/*"

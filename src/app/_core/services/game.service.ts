@@ -3,7 +3,7 @@ import { environment } from '@env/environment';
 // import * as admin from 'firebase-admin';
 // import { Timestamp } from 'firebase/firestore';
 import { initializeApp } from '@firebase/app';
-import { getFirestore, collection, setDoc, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, setDoc, addDoc, doc, getDoc, Timestamp, QuerySnapshot, getDocs } from 'firebase/firestore';
 import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
@@ -54,6 +54,23 @@ export class GameService {
         return `${root}/${gameId}`
     }
 
+    getGreatHitCollectionPath() {
+        return 'greatest_hits';
+    }
+
+    async makeUpdates() {
+        const bestGames: ChatterUpGame[] = [];
+        let lowestScore = -999;
+        for (let gameId of this._userService.user.chatterUpGames) {
+            const game = await this.getGame(gameId);
+            bestGames.push(game);
+        }
+        const sortedGames = _.sortBy(bestGames, (g) => g.score);
+        for (let game of sortedGames.slice(-10)) {
+            const docRef = await setDoc(doc(this.db, this.getGreatHitCollectionPath(), game.id), game);
+        }
+    }
+
     async getGame(gameId: string): Promise<ChatterUpGame> {
         const docRef = doc(this.db, this.getGamePath(gameId));
 
@@ -70,6 +87,25 @@ export class GameService {
         } catch (error) {
             console.error(`Error trying to find game with id ${gameId}:`, error);
             return Promise.reject();
+        }
+    }
+
+    async getGreatistHits(): Promise<ChatterUpGame[]> {
+        const gameCollectionRef = collection(this.db, this.getGreatHitCollectionPath());
+
+        // Create a query to order the documents by the 'score' field in descending order
+        const q = query(gameCollectionRef, orderBy('score', 'desc'));
+
+        try {
+            const querySnapshot: QuerySnapshot<FirestoreChatterUpGame> = await getDocs(q) as QuerySnapshot<FirestoreChatterUpGame>;
+            const sortedGames: ChatterUpGame[] = [];
+            querySnapshot.forEach((game) => {
+                sortedGames.push( this.getGameFromFirestoreGame(game.data()) );
+            });
+            return sortedGames;
+        } catch (error) {
+            console.error('Error getting sorted games:', error);
+            throw error;
         }
     }
 

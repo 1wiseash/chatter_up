@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationService, SubscriptionService, UserService } from '@services';
-import { ZardButtonComponent } from "@app/_shared/components/button/button.component";
-import { ZardFormModule } from '@app/_shared/components/form/form.module';
-import { ZardInputDirective } from '@app/_shared/components/input/input.directive';
+import { ZardButtonComponent } from "@shared/components/button/button.component";
+import { ZardFormModule } from '@shared/components/form/form.module';
+import { ZardInputDirective } from '@shared/components/input/input.directive';
 import { toast } from 'ngx-sonner';
-import { ZardCardComponent } from '@app/_shared/components/card/card.component';
+import { ZardCardComponent } from '@shared/components/card/card.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 

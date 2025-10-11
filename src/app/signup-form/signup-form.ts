@@ -2,11 +2,11 @@ import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { ZardButtonComponent } from "@app/_shared/components/button/button.component";
-import { ZardInputDirective } from '@app/_shared/components/input/input.directive';
-import { ZardFormModule } from '@app/_shared/components/form/form.module';
-import { confirmPasswordValidator } from '@app/_core/util/confirm-password.validator';
-import { ZardPopoverComponent, ZardPopoverDirective } from '@app/_shared/components/popover/popover.component';
+import { ZardButtonComponent } from "@shared/components/button/button.component";
+import { ZardInputDirective } from '@shared/components/input/input.directive';
+import { ZardFormModule } from '@shared/components/form/form.module';
+import { confirmPasswordValidator } from '@util';
+import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
 import { RouterLink } from '@angular/router';
 import { AuthService, UserService } from '@services';
 

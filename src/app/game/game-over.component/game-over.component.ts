@@ -1,8 +1,8 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ChatterUpGame, User } from '@app/_core/models';
-import { Z_ALERT_MODAL_DATA } from '@app/_shared/components/alert-dialog/alert-dialog.service';
+import { ChatterUpGame, User } from '@models';
+import { Z_ALERT_MODAL_DATA } from '@shared/components/alert-dialog/alert-dialog.service';
 import { GameService, UserService } from '@services';
 
 interface iDialogData {

@@ -95,11 +95,7 @@
                   @for (game of recentGames(); track game.id) {
                     <div class="flex items-center justify-between bg-gray-50 rounded-lg">
                       <div class="flex items-center space-x-2">
-                        <z-badge class="bg-blue-600 text-white"
-                            [class.bg-orange-600]="game.type === 'dating'"
-                            [class.bg-purple-600]="game.type === 'social'">
-                          {{game.type | gameType}}
-                        </z-badge>
+                        <cu-game-type [gameType]="game.type"></cu-game-type>
                         <span class="text-sm text-gray-600">{{game.startTime | date:'M/d'}}</span>
                         <span class="text-sm text-gray-600">{{game.scenario}}</span>
                       </div>

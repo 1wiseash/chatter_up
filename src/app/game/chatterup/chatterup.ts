@@ -1,18 +1,18 @@
 import { DatePipe } from '@angular/common';
-import { AfterViewChecked, Component, computed, ElementRef, inject, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
+import { Component, computed, ElementRef, inject, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ZardBadgeComponent } from '@app/_shared/components/badge/badge.component';
-import { ZardButtonComponent } from '@app/_shared/components/button/button.component';
-import { ZardFormModule } from '@app/_shared/components/form/form.module';
-import { ZardInputDirective } from '@app/_shared/components/input/input.directive';
-import { ZardPopoverComponent, ZardPopoverDirective } from '@app/_shared/components/popover/popover.component';
+import { ZardBadgeComponent } from '@shared/components/badge/badge.component';
+import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardFormModule } from '@shared/components/form/form.module';
+import { ZardInputDirective } from '@shared/components/input/input.directive';
+import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
 import { ChatMessage, GameTypeInfo, GameType, environments, ChatterUpGame } from '@models';
 import { GameService, UserService } from '@services';
 import { toast } from 'ngx-sonner';
 import _ from 'lodash';
-import { ZardAlertDialogService } from '@app/_shared/components/alert-dialog/alert-dialog.service';
+import { ZardAlertDialogService } from '@shared/components/alert-dialog/alert-dialog.service';
 import { GameOverComponent } from '../game-over.component/game-over.component';
 
 @Component({
@@ -30,10 +30,9 @@ import { GameOverComponent } from '../game-over.component/game-over.component';
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'
 })
-export class Chatterup implements AfterViewChecked {
-  @ViewChild('messagesContainer') messagesContainerRef!: ElementRef;
-  @ViewChildren('messageRef') messageRefs!: QueryList<ElementRef>;
-
+export class Chatterup {
+  @ViewChild('scrollAnchor') scrollAnchorRef!: ElementRef;
+  
   private readonly _gameService = inject(GameService);
   private readonly _userService = inject(UserService);
   private alertDialogService = inject(ZardAlertDialogService);
@@ -69,8 +68,8 @@ export class Chatterup implements AfterViewChecked {
 
     // Scroll last message into view once they have had a chance to be updated
     setTimeout( () => {
-      if (this.messageRefs && this.messageRefs.last) {
-        this.messageRefs.last.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (this.scrollAnchorRef) {
+        this.scrollAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
     }, 1)
     return messages;
@@ -79,10 +78,6 @@ export class Chatterup implements AfterViewChecked {
   messageForm = new FormGroup({
     message: new FormControl('', [Validators.required]),
   });
-
-  ngAfterViewChecked() {
-    // Scroll to the last item after the view has been updated
-  }
 
   async onSubmit() {
     if (this.messageForm.value?.message) {

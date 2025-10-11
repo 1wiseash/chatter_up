@@ -3,7 +3,7 @@
         Chatter Up for {{chatEnvironmentTitle()}}!
     </h1>
     <h2 class="text-center mb-6 text-2xl font-bold text-green-600">
-        Scenario: {{game().scenario}}
+        Scenario: {{game.scenario}}
     </h2>
 </div>
 <section class="h-[70vh] sm:h-[74vh] py-2 bg-gradient-to-br from-blue-50 to-teal-50 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8
@@ -26,16 +26,16 @@ rounded-2xl shadow-2xl flex flex-col">
         <div class="flex items-center space-x-2">
             <span class="text-xl text-gray-500">Score:</span>
             <span class="text-2xl font-bold text-green-600">
-                {{game().score > 0 ? '+' : ''}}{{game().score}}
+                {{gameScore() > 0 ? '+' : ''}}{{gameScore()}}
             </span>
         </div>
 
     </div>
 
     <!-- Messages -->
-    <div class="space-y-4 mb-6 h-[75vh] overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
+    <div #messagesContainer class="space-y-4 mb-6 h-[75vh] overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
         @for (message of chatMessages(); track message.id) {
-            <div class="flex"
+            <div class="flex" #messageRef
                     [class.justify-end]="message.sender === 'user'"
                     [class.justify-start]="message.sender === 'coach'">
                 <div>
@@ -77,18 +77,14 @@ rounded-2xl shadow-2xl flex flex-col">
         <div #scrollAnchor></div>
     </div>
 
-    <!-- Input -->
-    <form [formGroup]="messageForm" (ngSubmit)="onSubmit()" class="flex space-x-2 items-baseline">
-        <z-form-field class="flex-1">
-            <z-form-control>
-                <input z-input placeholder="Type your response..."
-                        formControlName="message" autocomplete="none"/>
-            </z-form-control>
-        </z-form-field>
-        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeRemaining() <= 0"
-                class="justify-center rounded-md bg-teal-500 mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">
-            <span class="icon-[bx--mail-send]"></span>
-            <span>Send</span>
-        </button>
-    </form>
+    <!-- Game Controls -->
+    <div class="flex place-content-center space-x-1">
+        <button (click)="advance(-1000)" title="Rewind to beginning" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--rewind]"></span></button>
+        <button (click)="advance(-1)" title="Step back" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--skip-previous]"></span></button>
+        @if(playing()) {<button (click)="pause()" title="Pause" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--pause]"></span></button>}
+        @else {<button (click)="play()" title="Play" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--play]"></span></button>}
+        <button (click)="advance(1)" title="Step forward" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--skip-next]"></span></button>
+        <button (click)="advance(1000)" title="Fast-forward to end" class="w-10"><span class="text-4xl h-12 w-12 icon-[bx--fast-forward]"></span></button>
+        <button (click)="toggleSpeed()" title="Change speed" class="flex items-center h-12"><span class="text-2xl h-12 icon-[bx--run]"></span><span class="">x{{PLAY_SPEEDS[currentPlaySpeedIndex()]}}</span></button>
+    </div>
 </section>
