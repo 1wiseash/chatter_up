@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ChatMessage, CHATTER_UP_GAME_DURATION, ChatterUpGame, DEFAULT_CHATTER_UP_GAME, environments } from '@models';
 import { GameService, UserService } from '@services';
 import { ZardBadgeComponent } from '@shared/components/badge/badge.component';
-import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardFormModule } from '@shared/components/form/form.module';
 import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
 import _ from 'lodash';
@@ -16,7 +15,6 @@ import { tap } from 'rxjs/operators';
     ZardBadgeComponent,
     ZardPopoverComponent,
     ZardPopoverDirective,
-    ZardButtonComponent,
     ZardFormModule,
     DatePipe,
   ],

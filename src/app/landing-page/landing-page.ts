@@ -61,4 +61,29 @@ export class LandingPage {
     }
   }
 
+  testimonials = [
+    {
+      name: 'Sarah Chen',
+      role: 'Marketing Manager',
+      content: 'ChatterUp helped me nail networking events. I went from awkward small talk to confident conversations in just two weeks!',
+      score: '+18 avg',
+      avatar: '👩‍💼'
+    },
+    {
+      name: 'Mike Rodriguez',
+      role: 'Software Developer',
+      content: 'The dating practice sessions were a game-changer. I finally feel comfortable starting conversations on apps.',
+      score: '+22 best',
+      avatar: '👨‍💻'
+    },
+    {
+      name: 'Emma Little',
+      role: 'College Student',
+      content: 'As someone with social anxiety, this platform gave me a safe space to practice. Now parties don\'t scare me!',
+      score: '+16 avg',
+      avatar: '👩‍🎓'
+    }
+  ];
+
+
 }
