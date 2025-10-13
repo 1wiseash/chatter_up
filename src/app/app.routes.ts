@@ -6,6 +6,7 @@ import { HomePage } from './home-page/home-page';
 import { guestGuard } from './_core/guards/guest-guard';
 import { userGuard } from './_core/guards/user-guard';
 import { PricingPage } from './pricing-page/pricing-page';
+import { MembersOnlyPage } from './members-only-page/members-only-page';
 
 export const routes: Routes = [
     {
@@ -37,8 +38,14 @@ export const routes: Routes = [
         title: 'Pricing',
     },
     {
+        path: 'members-only',
+        component: MembersOnlyPage,
+        title: 'Members Only',
+    },
+    {
         path: 'game',
         loadChildren: () => import('./game/game-module').then(m => m.GameModule),
+        canActivate: [userGuard],
     },
     {
         path: 'arena',
