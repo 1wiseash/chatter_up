@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NotificationService, SubscriptionService, UserService } from '@services';
+import { AuthService, NotificationService, SubscriptionService, UserService } from '@services';
 import { ZardButtonComponent } from "@shared/components/button/button.component";
 import { ZardFormModule } from '@shared/components/form/form.module';
 import { ZardInputDirective } from '@shared/components/input/input.directive';
@@ -28,13 +28,10 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LandingPage {
-  authDialogOpen = false;
   readonly _subscriberService = inject(SubscriptionService);
   readonly _notificationService = inject(NotificationService);
-  readonly _userService = inject(UserService);
-
-  // Convert the Observable to a Signal
-  readonly user = toSignal(this._userService.user$);
+  readonly _authService = inject(AuthService);
+  readonly loggedIn = this._authService.loggedIn;
 
   signupForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
