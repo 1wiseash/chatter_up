@@ -42,7 +42,7 @@
                     Current Plan
                   </button>
                 } @else {
-                  <button z-button [class.popular]="plan.popular" [disabled]="user()?.membershipLevel === plan.id" (click)="upgrade(plan)" class="w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-teal-600 text-teal-600 hover:bg-teal-50">
+                  <button z-button [class.popular]="plan.popular" (click)="upgrade(plan)" class="w-full py-3 px-6 rounded-lg font-semibold transition-colors border-2 border-teal-600 text-teal-600 hover:bg-teal-50 cursor-pointer">
                     {{getCallToAction(plan)}}
                   </button>
                 }
