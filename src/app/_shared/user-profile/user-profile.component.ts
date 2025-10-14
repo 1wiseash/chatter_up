@@ -131,7 +131,9 @@ export class UserProfileComponent implements OnInit {
             }
 
             // 4. Re-fetch and Render
-            await this.fetchData();
+            setTimeout( async () => {
+                await this.fetchData();
+            }, 1);
             
             // 5. Exit edit mode and notify success
             this.toggleEditMode(); // Exit edit mode
