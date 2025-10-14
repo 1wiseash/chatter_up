@@ -11,36 +11,109 @@
 
 <!-- Profile Details -->
 @if (!isLoading()) {
-<div id="profile-details" class="flex items-center space-x-2">
-    
-    <!-- Avatar Image. All styling converted to Tailwind classes. -->
-    <img [src]="avatarUrl()" 
-        alt="User Avatar" 
-        class="w-24 h-24 object-cover border-4 border-white shadow-lg rounded-full"
-        (error)="handleImageError()"
-    >
-    
-    <div class="p-1 space-y-2">
-        <!-- Username -->
-        <h1 id="username-display" class="text-4xl font-bold text-gray-900 leading-tight">
-            {{ userProfile().username }}
-        </h1>
-        
-        <!-- User ID (for debugging/sharing) -->
-        <p class="text-gray-500 italic">
-            "{{userProfile().story}}"
-        </p>
-        <div class="text-xs">
-            Business: {{userProfile().rank.business | currentSkillLevel}},
-            Dating: {{userProfile().rank.dating | currentSkillLevel}},
-            Social: {{userProfile().rank.social | currentSkillLevel}}
+    @if (!isEditing()) {
+        <div id="profile-details" class="flex items-center space-x-2">
+            <img [src]="avatarUrl()" 
+                alt="User Avatar" 
+                class="w-24 h-24 object-cover border-4 border-white shadow-lg rounded-full"
+                (error)="handleImageError()"
+            >
+            
+            <div class="p-1 space-y-2">
+                <!-- Username -->
+                <h1 id="username-display" class="text-4xl font-bold text-gray-900 leading-tight">
+                    {{ userProfile().username }}
+                </h1>
+                
+                <!-- User ID (for debugging/sharing) -->
+                <p class="text-gray-500 italic">
+                    "{{userProfile().story}}"
+                </p>
+                <div class="text-xs">
+                    Business: {{userProfile().rank.business | currentSkillLevel}},
+                    Dating: {{userProfile().rank.dating | currentSkillLevel}},
+                    Social: {{userProfile().rank.social | currentSkillLevel}}
+                </div>
+            </div>
+            
+            @if(showEdit) {
+                <button (click)="toggleEditMode()" class="relative -top-8 cursor-pointer rounded-full text-white bg-teal-600 h-8 w-8">
+                    <span class="icon-[bx--pencil]" title="Edit profile"></span>
+                </button>
+            }
         </div>
-    </div>
-    
-    @if(showEdit) {
-        <button (click)="editProfile()" class="relative -top-8 cursor-pointer rounded-full text-white bg-teal-600 h-8 w-8">
-            <span class="icon-[bx--pencil]" title="Edit profile"></span>
-        </button>
+    } @else {
+        <div class="space-y-6">
+            <h2 class="text-2xl font-semibold text-gray-900 text-center">Edit Profile</h2>
+            <!-- Avatar Upload Section -->
+            <div class="flex flex-col items-center space-y-3">
+                <img [src]="avatarUrl()" 
+                    alt="Current Avatar" 
+                    class="w-24 h-24 object-cover border-4 border-gray-200 shadow-inner rounded-full mb-2"
+                >
+                <label class="block text-sm font-medium text-gray-700">Change Avatar</label>
+                <input type="file" 
+                        (change)="handleFileInput($event)" 
+                        accept="image/*"
+                        class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-indigo-50 file:text-indigo-700
+                            hover:file:bg-indigo-100"
+                />
+                @if (selectedFile()) {
+                <p class="text-xs text-green-600">File selected: {{ selectedFile()!.name }}</p>
+                }
+            </div>
+
+            <!-- Username Input -->
+            <div>
+                <label for="newUsername" class="block text-sm font-medium text-gray-700">Username</label>
+                <input id="newUsername" 
+                        type="text" 
+                        [value]="newUsername()"
+                        (input)="newUsername.set($event.target.value)"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter new username"
+                        minlength="3"
+                        required
+                >
+            </div>
+
+            <!-- Story Input -->
+            <div>
+                <label for="newStory" class="block text-sm font-medium text-gray-700">Story</label>
+                <input id="newStory" 
+                        type="text" 
+                        [value]="newStory()"
+                        (input)="newStory.set($event.target.value)"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter new story"
+                        minlength="3"
+                        required
+                >
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between space-x-4 pt-4">
+                <button (click)="toggleEditMode()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
+                Cancel
+                </button>
+                <button (click)="saveProfile()" 
+                        [disabled]="isSaving() || (newUsername() === userProfile().username && newStory() === userProfile().story && !selectedFile())"
+                        class="flex-1 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg shadow-md hover:bg-indigo-700 disabled:bg-indigo-400 transition duration-150 ease-in-out flex items-center justify-center">
+                @if (isSaving()) {
+                    <svg class="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                } @else {
+                    Save Changes
+                }
+                </button>
+            </div>
+        </div>
     }
-</div>
 }

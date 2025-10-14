@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { getStorage, ref, getDownloadURL, FirebaseStorage } from 'firebase/storage';
+import { getStorage, ref, getDownloadURL, FirebaseStorage, uploadBytes } from 'firebase/storage';
 import { Achievement, DEFAULT_USER, DEFAULT_USER_PROFILE, GUEST_USER, MembershipType, User, UserProfile } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith, shareReplay } from 'rxjs/operators';
@@ -154,8 +154,8 @@ export class UserService {
       }
     }
 
-    async getAvatarUrl(userId: string): Promise<string | null> {
-        // Expected Storage Path: avatars/{userId}
+    async getAvatarUrl(userId?: string): Promise<string | null> {
+        if (!userId) userId = this._authService.uid;
         const avatarRef = ref(this.storage, this.getUserAvatarPath(userId));
         
         try {
@@ -165,6 +165,18 @@ export class UserService {
             // Log the warning and return null, letting the (error) binding on the <img> handle the fallback.
             console.warn("Error fetching avatar URL (likely file not found):", (error as any).code);
             return null; 
+        }
+    }
+
+    async saveAvatar(fileSelected: File) {
+        try {
+            const url = await this.getAvatarUrl() as string;
+            const avatarRef = ref(this.storage, url);
+            await uploadBytes(avatarRef, fileSelected);
+            await this.updateUserProfile({avatarURL: url});
+        } catch(error) {
+            console.error('Failed to stored avatar:', error);
+            throw error;
         }
     }
   

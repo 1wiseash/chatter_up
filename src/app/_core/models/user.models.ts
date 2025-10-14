@@ -64,7 +64,7 @@ export interface UserProfile {
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
     id: '',
-    avatarURL: 'src/assets/img/logo.png',
+    avatarURL: '/assets/img/logo.png',
     username: '',
     story: 'On the journey to be a better conversationalist.',
     rank: {'business': 0, 'dating': 0, 'social': 0},
