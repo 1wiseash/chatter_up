@@ -1,12 +1,21 @@
 import { ChangeDetectionStrategy, Component, signal, OnInit, inject, Input } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DEFAULT_USER_PROFILE } from '@models';
 import { CurrentSkillLevelPipe } from '@pipes';
 import { UserService } from '@services';
+import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardFormModule } from '@shared/components/form/form.module';
+import { ZardInputDirective } from '@shared/components/input/input.directive';
 
 @Component({
   selector: 'cu-user-profile',
-  imports: [CurrentSkillLevelPipe],
+  imports: [
+    CurrentSkillLevelPipe,
+    ReactiveFormsModule,
+    ZardButtonComponent,
+    ZardInputDirective,
+    ZardFormModule,
+  ],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,19 +38,18 @@ export class UserProfileComponent implements OnInit {
 
     // Editing State
     isEditing = signal(false);
-    newUsername = signal('');
-    newStory = signal('');
     selectedFile = signal<File | null>(null);
     isSaving = signal(false);
 
-    signinForm = new FormGroup({
-        username: new FormControl('', Validators.required),
-        story: new FormControl('', Validators.required),
-        avatar: new FormControl('')
-    });
+    profileForm!: FormGroup;
 
     async ngOnInit() {
-        this.fetchData();
+        await this.fetchData();
+        this.profileForm = new FormGroup({
+            username: new FormControl(this.userProfile().username, [Validators.required, Validators.minLength(3)]),
+            story: new FormControl(this.userProfile().story, [Validators.required, Validators.minLength(10)]),
+            avatar: new FormControl('')
+        });
     }
 
     async fetchData() {
@@ -93,10 +101,10 @@ export class UserProfileComponent implements OnInit {
     }
     
     async saveProfile(): Promise<void> {
-        const newUsernameValue = this.newUsername().trim();
+        const newUsernameValue = this.profileForm.value.username.trim();
         const usernameChanged = newUsernameValue && newUsernameValue !== this.userProfile().username;
 
-        const newStoryValue = this.newStory().trim();
+        const newStoryValue = this.profileForm.value.story.trim();
         const storyChanged = newStoryValue && newStoryValue !== this.userProfile().story;
 
         const fileSelected = this.selectedFile();

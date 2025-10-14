@@ -37,7 +37,7 @@
             </div>
             
             @if(showEdit) {
-                <button (click)="toggleEditMode()" class="relative -top-8 cursor-pointer rounded-full text-white bg-teal-600 h-8 w-8">
+                <button (click)="toggleEditMode()" class="relative -top-8 cursor-pointer rounded-full text-white bg-teal-600 h-8 w-8 min-w-8 min-h-8">
                     <span class="icon-[bx--pencil]" title="Edit profile"></span>
                 </button>
             }
@@ -45,75 +45,86 @@
     } @else {
         <div class="space-y-6">
             <h2 class="text-2xl font-semibold text-gray-900 text-center">Edit Profile</h2>
-            <!-- Avatar Upload Section -->
-            <div class="flex flex-col items-center space-y-3">
-                <img [src]="avatarUrl()" 
-                    alt="Current Avatar" 
-                    class="w-24 h-24 object-cover border-4 border-gray-200 shadow-inner rounded-full mb-2"
-                >
-                <label class="block text-sm font-medium text-gray-700">Change Avatar</label>
-                <input type="file" 
-                        (change)="handleFileInput($event)" 
-                        accept="image/*"
-                        class="block w-full text-sm text-gray-500
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-indigo-50 file:text-indigo-700
-                            hover:file:bg-indigo-100"
-                />
-                @if (selectedFile()) {
-                <p class="text-xs text-green-600">File selected: {{ selectedFile()!.name }}</p>
-                }
-            </div>
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-6">
+                <!-- Avatar Upload Section -->
+                <div class="flex flex-col items-center space-y-3">
+                    <img [src]="avatarUrl()" 
+                        alt="Current Avatar" 
+                        class="w-24 h-24 object-cover border-4 border-gray-200 shadow-inner rounded-full mb-2"
+                    >
+                    <input type="file" 
+                            (change)="handleFileInput($event)" 
+                            accept="image/*"
+                            class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-indigo-50 file:text-indigo-700
+                                hover:file:bg-indigo-100"
+                    />
+                    @if (selectedFile()) {
+                        <p class="text-xs text-green-600">File selected: {{ selectedFile()!.name }}</p>
+                    }
+                </div>
 
-            <!-- Username Input -->
-            <div>
-                <label for="newUsername" class="block text-sm font-medium text-gray-700">Username</label>
-                <input id="newUsername" 
-                        type="text" 
-                        [value]="newUsername()"
-                        (input)="newUsername.set($event.target.value)"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Enter new username"
-                        minlength="3"
-                        required
-                >
-            </div>
+                <!-- Username Input -->
+                <z-form-field>
+                    <z-form-label zRequired for="newUsername" class="block text-sm font-medium text-gray-700">Username</z-form-label>
+                    <z-form-control>
+                        <input id="newUsername" z-input formControlName="username"
+                                type="text"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        @if (profileForm.get('username')?.invalid && profileForm.get('username')?.touched) {
+                            <z-form-message class="text-red-500">
+                            @if (profileForm.get('username')?.errors?.['required']) {
+                                Username is required.
+                            }
+                            @if (profileForm.get('username')?.errors?.['minlength']) {
+                                Username must be at least three characters
+                            }
+                            </z-form-message>
+                        }
+                    </z-form-control>
+                </z-form-field>
 
-            <!-- Story Input -->
-            <div>
-                <label for="newStory" class="block text-sm font-medium text-gray-700">Story</label>
-                <input id="newStory" 
-                        type="text" 
-                        [value]="newStory()"
-                        (input)="newStory.set($event.target.value)"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Enter new story"
-                        minlength="3"
-                        required
-                >
-            </div>
+                <!-- Story Input -->
+                <z-form-field>
+                    <z-form-label zRequired for="newStory" class="block text-sm font-medium text-gray-700">Story</z-form-label>
+                    <z-form-control>
+                        <input z-input formControlName="story"
+                                type="text"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        @if (profileForm.get('story')?.invalid && profileForm.get('story')?.touched) {
+                            <z-form-message class="text-red-500">
+                            @if (profileForm.get('story')?.errors?.['required']) {
+                                Story is required.
+                            }
+                            @if (profileForm.get('story')?.errors?.['minlength']) {
+                                Username must be at least ten characters
+                            }
+                            </z-form-message>
+                        }
+                    </z-form-control>
+                </z-form-field>
 
-            <!-- Action Buttons -->
-            <div class="flex justify-between space-x-4 pt-4">
-                <button (click)="toggleEditMode()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
-                Cancel
-                </button>
-                <button (click)="saveProfile()" 
-                        [disabled]="isSaving() || (newUsername() === userProfile().username && newStory() === userProfile().story && !selectedFile())"
-                        class="flex-1 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg shadow-md hover:bg-indigo-700 disabled:bg-indigo-400 transition duration-150 ease-in-out flex items-center justify-center">
-                @if (isSaving()) {
-                    <svg class="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                } @else {
-                    Save Changes
-                }
-                </button>
-            </div>
+                <!-- Action Buttons -->
+                <div class="flex justify-between space-x-4 pt-4">
+                    <button z-button zType="outline" type="button" (click)="toggleEditMode()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">Cancel</button>
+                    <button z-button zType="default" type="submit" (click)="saveProfile()" 
+                            [disabled]="isSaving() || (profileForm.pristine && !selectedFile())"
+                            class="bg-teal-600 text-white flex-1 px-4 py-2 rounded-lg shadow-md disabled:bg-teal-400/75 disabled:cursor-none flex items-center justify-center">
+                    @if (isSaving()) {
+                        <svg class="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                    } @else {
+                        Save
+                    }
+                    </button>
+                </div>
+            </form>
         </div>
     }
 }
