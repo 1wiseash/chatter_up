@@ -1,119 +1,122 @@
-    <section class="py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">
-            Your ChatterUp Dashboard
-          </h2>
-          <p class="text-xl text-gray-600">
-            Membership Level: <a routerLink="/pricing" class="underline text-blue-600">{{user().membershipLevel | membershipLevel}}</a>
-          </p>
-        </div>
+<section class="py-20">
+  <div class="flex justify-center mb-12">
+    <cu-user-profile [showEdit]="true"></cu-user-profile>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">
+        Your ChatterUp Dashboard
+      </h2>
+      <p class="text-xl text-gray-600">
+        Membership Level: <a routerLink="/pricing" class="underline text-blue-600">{{user().membershipLevel | membershipLevel}}</a>
+      </p>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Stats Overview -->
-          <div class="md:col-span-2 space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <z-card  class="p-4 text-center" zTitle="Business">
-                <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.business}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.business ? user().chatterUpStats.totalScores.business / user().chatterUpStats.gameCounts.business : 0) | number:'1.1-2'}}</div>
-                <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.business}}</div>
-                <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.business}}</div>
-                <div class="text-center mb-4">
-                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
-                    {{user().chatterUpStats.totalScores.business | currentSkillLevel}}
-                  </z-badge>
-                </div>
-                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.business | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
-                <div class="text-sm text-gray-600 text-center">
-                  {{user().chatterUpStats.totalScores.business | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.business | nextSkillLevel}}
-                </div>
-              </z-card>
-              <z-card  class="p-4 text-center" zTitle="Dating">
-                <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.dating}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.dating ? user().chatterUpStats.totalScores.dating / user().chatterUpStats.gameCounts.dating : 0) | number:'1.1-2'}}</div>
-                <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.dating}}</div>
-                <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.dating}}</div>
-                <div class="text-center mb-4">
-                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
-                    {{user().chatterUpStats.totalScores.dating | currentSkillLevel}}
-                  </z-badge>
-                </div>
-                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.dating | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
-                <div class="text-sm text-gray-600 text-center">
-                  {{user().chatterUpStats.totalScores.dating | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.dating | nextSkillLevel}}
-                </div>
-              </z-card>
-              <z-card  class="p-4 text-center" zTitle="Social">
-                <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.social}}</div>
-                <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.social ? user().chatterUpStats.totalScores.social / user().chatterUpStats.gameCounts.social : 0) | number:'1.1-2'}}</div>
-                <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.social}}</div>
-                <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.social}}</div>
-                <div class="text-center mb-4">
-                  <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
-                    {{user().chatterUpStats.totalScores.social | currentSkillLevel}}
-                  </z-badge>
-                </div>
-                <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.social | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
-                <div class="text-sm text-gray-600 text-center">
-                  {{user().chatterUpStats.totalScores.social | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.social | nextSkillLevel}}
-                </div>
-              </z-card>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Stats Overview -->
+      <div class="md:col-span-2 space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <z-card  class="p-4 text-center" zTitle="Business">
+            <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.business}}</div>
+            <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.business ? user().chatterUpStats.totalScores.business / user().chatterUpStats.gameCounts.business : 0) | number:'1.1-2'}}</div>
+            <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.business}}</div>
+            <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.business}}</div>
+            <div class="text-center mb-4">
+              <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                {{user().chatterUpStats.totalScores.business | currentSkillLevel}}
+              </z-badge>
             </div>
-
-            <!-- Achievements -->
-            <z-card zTitle="Achievements" class="text-center">
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  @for (achievement of achievements(); track achievement.name) {
-                    <div class="p-3 rounded-lg border bg-gray-50 border-gray-200" 
-                            [class.bg-green-50]="achievement.earned"
-                            [class.border-green-200]="achievement.earned">
-                      <div class="flex items-center space-x-2">
-                        <span class="text-lg 🔒" [class.🏆]="achievement.earned">
-                          {{achievement.earned ? '🏆' : '🔒'}}
-                        </span>
-                        <div>
-                          <div class="font-semibold text-sm text-gray-600" 
-                            [class.text-green-800]="achievement.earned">
-                            {{achievement.name}}
-                          </div>
-                          <div class="text-xs text-gray-500">
-                            {{achievement.description}}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-              </div>
-            </z-card>
-          </div>
-
-          <!-- Sidebar -->
-          <div class="md:col-span-2 lg:col-span-1 space-y-8">
-            <!-- Recent Sessions -->
-            <z-card zTitle="Recent Practice Sessions" class="text-center">
-                <div class="space-y-3">
-                  @for (game of recentGames(); track game.id) {
-                    <div class="flex items-center justify-between bg-gray-50 rounded-lg">
-                      <div class="flex items-center space-x-2">
-                        <cu-game-type [gameType]="game.type"></cu-game-type>
-                        <span class="text-sm text-gray-600">{{game.startTime | date:'M/d'}}</span>
-                        <span class="text-sm text-gray-600">{{game.scenario}}</span>
-                      </div>
-                      <div class="flex items-center space-x-4">
-                        <span class="font-bold text-red-600"
-                          [class.text-green-600]="game.score >= 15" 
-                          [class.text-yellow-600]="game.score >= 5">
-                          {{game.score > 0 ? '+' : ''}}{{game.score}}
-                        </span>
-                      </div>
-                    </div>
-                  }
-                </div>
-                <button z-button (click)="showMoreGames(recentGames().length + 10)" zType="outline" class="w-full mt-4">
-                  View More Games
-                </button>
-            </z-card>
-          </div>
+            <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.business | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+            <div class="text-sm text-gray-600 text-center">
+              {{user().chatterUpStats.totalScores.business | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.business | nextSkillLevel}}
+            </div>
+          </z-card>
+          <z-card  class="p-4 text-center" zTitle="Dating">
+            <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.dating}}</div>
+            <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.dating ? user().chatterUpStats.totalScores.dating / user().chatterUpStats.gameCounts.dating : 0) | number:'1.1-2'}}</div>
+            <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.dating}}</div>
+            <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.dating}}</div>
+            <div class="text-center mb-4">
+              <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                {{user().chatterUpStats.totalScores.dating | currentSkillLevel}}
+              </z-badge>
+            </div>
+            <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.dating | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+            <div class="text-sm text-gray-600 text-center">
+              {{user().chatterUpStats.totalScores.dating | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.dating | nextSkillLevel}}
+            </div>
+          </z-card>
+          <z-card  class="p-4 text-center" zTitle="Social">
+            <div class="text-xl mb-2 text-gray-600">Total Chats: {{user().chatterUpStats.gameCounts.social}}</div>
+            <div class="text-xl mb-2 text-gray-600">Avg Score: {{(user().chatterUpStats.gameCounts.social ? user().chatterUpStats.totalScores.social / user().chatterUpStats.gameCounts.social : 0) | number:'1.1-2'}}</div>
+            <div class="text-xl mb-2 text-gray-600">Best Score: {{user().chatterUpStats.bestScores.social}}</div>
+            <div class="text-xl mb-2 text-gray-600">Day Streak: {{user().chatterUpStats.streakDays.social}}</div>
+            <div class="text-center mb-4">
+              <z-badge class="bg-teal-600 text-white text-lg px-4 py-1">
+                {{user().chatterUpStats.totalScores.social | currentSkillLevel}}
+              </z-badge>
+            </div>
+            <cu-progress-bar [percentage]="user().chatterUpStats.totalScores.social | percentageToNextSkillLevel" [height]="14" class="mb-2"></cu-progress-bar>
+            <div class="text-sm text-gray-600 text-center">
+              {{user().chatterUpStats.totalScores.social | pointsToNextSkillLevel}} points to {{user().chatterUpStats.totalScores.social | nextSkillLevel}}
+            </div>
+          </z-card>
         </div>
+
+        <!-- Achievements -->
+        <z-card zTitle="Achievements" class="text-center">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              @for (achievement of achievements(); track achievement.name) {
+                <div class="p-3 rounded-lg border bg-gray-50 border-gray-200" 
+                        [class.bg-green-50]="achievement.earned"
+                        [class.border-green-200]="achievement.earned">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-lg 🔒" [class.🏆]="achievement.earned">
+                      {{achievement.earned ? '🏆' : '🔒'}}
+                    </span>
+                    <div>
+                      <div class="font-semibold text-sm text-gray-600" 
+                        [class.text-green-800]="achievement.earned">
+                        {{achievement.name}}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {{achievement.description}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+          </div>
+        </z-card>
       </div>
-    </section>
+
+      <!-- Sidebar -->
+      <div class="md:col-span-2 lg:col-span-1 space-y-8">
+        <!-- Recent Sessions -->
+        <z-card zTitle="Recent Practice Sessions" class="text-center">
+            <div class="space-y-3">
+              @for (game of recentGames(); track game.id) {
+                <div class="flex items-center justify-between bg-gray-50 shadow-sm p-2 cursor-pointer hover:scale-110 hover:shadow-md" routerLink="/arena/watch" [state]="{game}">
+                  <div class="flex items-center space-x-2">
+                    <cu-game-type [gameType]="game.type"></cu-game-type>
+                    <span class="text-sm text-gray-600">{{game.startTime | date:'M/d'}}</span>
+                    <span class="text-sm text-gray-600">{{game.scenario}}</span>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    <span class="font-bold text-red-600"
+                      [class.text-green-600]="game.score >= 15" 
+                      [class.text-yellow-600]="game.score >= 5">
+                      {{game.score > 0 ? '+' : ''}}{{game.score}}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+            <button z-button (click)="showMoreGames(recentGames().length + 10)" zType="outline" class="w-full mt-4">
+              View More Games
+            </button>
+        </z-card>
+      </div>
+    </div>
+  </div>
+</section>

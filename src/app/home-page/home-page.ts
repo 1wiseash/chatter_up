@@ -16,6 +16,7 @@ import {
 } from '@pipes';
 import { RouterLink } from '@angular/router';
 import { GameTypeComponent } from '@shared/game-type/game-type';
+import { UserProfileComponent } from '@shared/user-profile/user-profile.component';
 
 @Component({
   selector: 'cu-home-page',
@@ -33,6 +34,7 @@ import { GameTypeComponent } from '@shared/game-type/game-type';
     NextSkillLevelPipe,
     RouterLink,
     DecimalPipe,
+    UserProfileComponent,
   ],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css'

@@ -16,6 +16,7 @@ export enum SkillLevel {
 }
 
 export interface User {
+    id: string;
     username: string;
     chatterUpGames: string[];
     chatterUpStats: {
@@ -28,6 +29,7 @@ export interface User {
 }
 
 export const DEFAULT_USER: User = {
+    id: '',
     username: '',
     chatterUpGames: [],
     chatterUpStats: {
@@ -40,6 +42,7 @@ export const DEFAULT_USER: User = {
 }
 
 export const GUEST_USER: User = {
+    id: '',
     username: 'guest',
     chatterUpGames: [],
     chatterUpStats: {
@@ -49,4 +52,20 @@ export const GUEST_USER: User = {
         streakDays: {'business': 0, 'dating': 0, 'social': 0},
     },
     membershipLevel: MembershipType.Free,
+}
+
+export interface UserProfile {
+    id: string;
+    avatarURL: string;
+    username: string;
+    story: string;
+    rank: {'business': number, 'dating': number, 'social': number};
+}
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+    id: '',
+    avatarURL: 'src/assets/img/logo.png',
+    username: '',
+    story: 'On the journey to be a better conversationalist.',
+    rank: {'business': 0, 'dating': 0, 'social': 0},
 }
