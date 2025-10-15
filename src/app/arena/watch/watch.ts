@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, ElementRef, inject, OnInit, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChatMessage, CHATTER_UP_GAME_DURATION, ChatterUpGame, DEFAULT_CHATTER_UP_GAME, environments } from '@models';
+import { GameTypePipe } from '@pipes';
 import { GameService, UserService } from '@services';
 import { ZardBadgeComponent } from '@shared/components/badge/badge.component';
 import { ZardFormModule } from '@shared/components/form/form.module';
@@ -17,6 +18,7 @@ import { tap } from 'rxjs/operators';
     ZardPopoverDirective,
     ZardFormModule,
     DatePipe,
+    GameTypePipe,
   ],
   templateUrl: './watch.html',
   styleUrl: './watch.css'
@@ -36,7 +38,6 @@ export class Watch implements OnInit {
     gameScore!: Signal<number>;
     currentMove = signal<number>(-1);
     chatMessages!: Signal<ChatMessage[]>;
-    chatEnvironmentTitle!: Signal<string | undefined>;
     timers: NodeJS.Timeout[] = [];
     game!: ChatterUpGame;
 
@@ -44,7 +45,6 @@ export class Watch implements OnInit {
         console.log(history.state['game']);
         this.game = history.state['game'];
 
-        this.chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game.type)?.title);
         this.chatMessages = computed( () => {
             if (this.currentMove() < 0) {
                 return [];

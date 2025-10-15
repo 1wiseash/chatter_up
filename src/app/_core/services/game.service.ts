@@ -10,6 +10,7 @@ import { tap, switchMap, startWith } from 'rxjs/operators';
 import _ from 'lodash';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 // // Initialize the Firebase Admin SDK once if not already initialized
 // // In a typical Firebase Functions environment, this should be done globally.
@@ -19,6 +20,7 @@ import { AuthService } from './auth.service';
 
 // const db = admin.firestore();
 const GAMES_COLLECTION = 'chatter_up_games';
+const GREATEST_HITS_COLLECTION = 'greatest_hits';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +28,7 @@ const GAMES_COLLECTION = 'chatter_up_games';
 export class GameService {
     readonly app = initializeApp(environment.firebaseConfig);
     readonly db = getFirestore(this.app);
+    readonly functions = getFunctions(this.app);
     readonly _userService = inject(UserService);
     readonly _authService = inject(AuthService);
 
@@ -54,21 +57,28 @@ export class GameService {
         return `${root}/${gameId}`
     }
 
-    getGreatHitCollectionPath() {
-        return 'greatest_hits';
+    getGreatHitCollectionPath(gameType: GameType) {
+        return `${GREATEST_HITS_COLLECTION}/${GameType[gameType]}/games`;
     }
 
     async makeUpdates() {
-        const bestGames: ChatterUpGame[] = [];
-        let lowestScore = -999;
-        for (let gameId of this._userService.user.chatterUpGames) {
-            const game = await this.getGame(gameId);
-            bestGames.push(game);
-        }
-        const sortedGames = _.sortBy(bestGames, (g) => g.score);
-        for (let game of sortedGames.slice(-10)) {
-            const docRef = await setDoc(doc(this.db, this.getGreatHitCollectionPath(), game.id), game);
-        }
+        // for (let gameId of this._userService.user.chatterUpGames) {
+        //     // Get a reference to the callable function
+        //     const updateTopTenGames = httpsCallable(this.functions, 'updateTopTenGames');
+
+        //     // Call the function with the game ID
+        //     updateTopTenGames({ gameId })
+        //     .then((result) => {
+        //         // Read result data.
+        //         const data = result.data;
+        //         console.log('Result of updateTopTenGames function call:', data);
+        //     }).catch((error) => {
+        //         // Handle errors.
+        //         const code = error.code;
+        //         const message = error.message;
+        //         console.error('Error calling updateTopTenGames function call:', code, message);
+        //     });            
+        // }
     }
 
     async getGame(gameId: string): Promise<ChatterUpGame> {
@@ -90,8 +100,8 @@ export class GameService {
         }
     }
 
-    async getGreatistHits(): Promise<ChatterUpGame[]> {
-        const gameCollectionRef = collection(this.db, this.getGreatHitCollectionPath());
+    async getGreatistHits(gameType: GameType): Promise<ChatterUpGame[]> {
+        const gameCollectionRef = collection(this.db, this.getGreatHitCollectionPath(gameType));
 
         // Create a query to order the documents by the 'score' field in descending order
         const q = query(gameCollectionRef, orderBy('score', 'desc'));
@@ -107,6 +117,23 @@ export class GameService {
             console.error('Error getting sorted games:', error);
             throw error;
         }
+    }
+
+    updateGreatestHits(gameId: string) {
+        // Get a reference to the callable function
+        const updateTopTenGames = httpsCallable(this.functions, 'updateTopTenGames');
+
+        // Call the function with the game ID
+        updateTopTenGames({ gameId })
+        .then((result) => {
+            // Read result data.
+            const data = result.data;
+        }).catch((error) => {
+            // Handle errors.
+            const code = error.code;
+            const message = error.message;
+            console.error('Error calling updateTopTenGames function call:', code, message);
+        });            
     }
 
     async startChatterUp(environment: GameType): Promise<boolean> {
@@ -188,6 +215,9 @@ export class GameService {
         }
         // NOTE: Game count was updated when game started
         this._userService.updateUser({chatterUpStats: stats});
+
+        //Update top ten lists
+        this.updateGreatestHits(this._currentChatterUpGame.value.id);
     }
 
     async sendMessage(message: string, elapsedTime: number): Promise<boolean> {

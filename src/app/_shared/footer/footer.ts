@@ -18,6 +18,6 @@ export class Footer {
     readonly footerNotification = toSignal(this._notificationService.footerMessage$);
     
     makeUpdates() {
-      // this._gameService.makeUpdates();
+      this._gameService.makeUpdates();
     }
 }

@@ -14,7 +14,16 @@ service cloud.firestore {
     match /chatter_up_games/{gameId} {
     	allow read, write: if true;
     }
-    match /greatest_hits/{gameId} {
+    match /greatest_hits/business/games/{gameId} {
+    	allow read, write: if true;
+    }
+    match /greatest_hits/dating/games/{gameId} {
+    	allow read, write: if true;
+    }
+    match /greatest_hits/social/games/{gameId} {
+    	allow read, write: if true;
+    }
+    match /user_profiles/{gameId} {
     	allow read, write: if true;
     }
   }
