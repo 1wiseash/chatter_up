@@ -6,25 +6,30 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-const admin = require("firebase-admin");
-
-// Initialize the Firebase Admin SDK
-admin.initializeApp();
-const db = admin.firestore();
+const {firestore} = require("firebase-admin");
 const {onCall, HttpsError} = require("firebase-functions/https");
-
+const {onObjectFinalized} = require("firebase-functions/v2/storage");
+const {initializeApp} = require("firebase-admin/app");
+const {getStorage} = require("firebase-admin/storage");
+const {dirname, join, basename} = require("path");
+const sharp = require("sharp");
+const {existsSync, mkdirSync, unlinkSync} = require("fs");
 const {setGlobalOptions} = require("firebase-functions");
 // const {onRequest} = require("firebase-functions/https");
 // const logger = require("firebase-functions/logger");
+
+// Initialize the Firebase Admin SDK
+initializeApp();
+const db = firestore();
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
 // traffic spikes by instead downgrading performance. This limit is a
 // per-function limit. You can override the limit for each function using the
 // `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// `onRequest({maxInstances: 5}, (req, res) => {...})`.
 // NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// functions should each use functions.runWith({maxInstances: 10}) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
 setGlobalOptions({maxInstances: 10});
@@ -119,3 +124,69 @@ exports.updateTopTenGames = onCall(async (request) => {
   }
 });
 
+exports.compressImage = onObjectFinalized(async (event) => {
+  const fileBucket = event.data.bucket; // The Storage bucket with the file.
+  const filePath = event.data.name; // File path in the bucket.
+  const contentType = event.data.contentType; // File content type.
+  // A number that increases by 1 on each change.
+  const metageneration = event.data.metageneration;
+  const fileSize = event.data.size; // File size in bytes.
+
+  const storage = getStorage();
+  const bucket = storage.bucket(fileBucket);
+
+  const ONE_KILOBYTE = 1024;
+  const COMPRESSION_THRESHOLD = 250 * ONE_KILOBYTE; // 250 KB
+
+  // Exit if this is a deletion or a metageneration is not the first.
+  if (metageneration > 1 || !contentType.startsWith("image/")) {
+    return console.log("Not a new image or not an image file.");
+  }
+
+  // Check if the image needs to be compressed.
+  if (fileSize < COMPRESSION_THRESHOLD) {
+    return console.log("Image size is below 250kb. No compression needed.");
+  }
+
+  // Prevent an infinite loop: don't process compressed images.
+  // Add a metadata property to the compressed image.
+  const originalMetadata = event.data.metadata || {};
+  if (originalMetadata.compressed) {
+    return console.log("Image is already a compressed version. Exiting.");
+  }
+
+  const fileName = basename(filePath);
+  const tempFilePath = join("/tmp", fileName);
+  const tempDir = dirname(tempFilePath);
+
+  // Create the temp directory if it doesn't exist.
+  if (!existsSync(tempDir)) {
+    mkdirSync(tempDir, {recursive: true});
+  }
+
+  const file = bucket.file(filePath);
+
+  console.log(`Downloading image from path: ${filePath}`);
+  await file.download({destination: tempFilePath});
+
+  console.log(`Compressing image with Sharp...`);
+  const compressedBuffer = await sharp(tempFilePath)
+      .jpeg({quality: 80})
+      .toBuffer();
+
+  //   const compressedFileName = `compressed_${fileName}`;
+  //   const compressedFilePath = join("/tmp", compressedFileName);
+
+  console.log(`Uploading compressed image back to storage...`);
+  await file.save(compressedBuffer, {
+    metadata: {
+      contentType: contentType,
+      metadata: {compressed: "true"}, // Add a custom metadata property
+    },
+  });
+
+  // Clean up temporary files.
+  unlinkSync(tempFilePath);
+
+  console.log(`Image at ${filePath} was replaced with a compressed version.`);
+});
