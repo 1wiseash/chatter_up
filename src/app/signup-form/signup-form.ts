@@ -14,7 +14,6 @@ import { AuthService, UserService } from '@services';
 @Component({
   selector: 'cu-signup-form',
   imports: [
-    ZardButtonComponent,
     ReactiveFormsModule,
     ZardButtonComponent,
     ZardInputDirective,

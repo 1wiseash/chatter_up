@@ -1,1 +1,81 @@
-<p>contact-us-page works!</p>
+<div class="flex min-h-full flex-col items-center px-6 pt-6 lg:px-8">
+  <div class="mx-auto w-full max-w-sm">
+    <img src="../../assets/img/logo.svg" alt="Chatter Up!" class="h-[3.5em] mx-auto w-auto" />
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight">Contact Chatter Up!</h2>
+  </div>
+
+  <div class="mt-6 mx-auto w-full max-w-sm">
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <z-form-field>
+        <label z-form-label zRequired>Name</label>
+        <z-form-control>
+          <input z-input type="text" placeholder="Name" formControlName="name" autocomplete="name"/>
+          @if (contactForm.get('name')?.invalid && contactForm.get('name')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (contactForm.get('name')?.errors?.['required']) {
+                Name is required.
+            }
+            @if (contactForm.get('name')?.errors?.['minlength']) {
+                Name must be at least three characters
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
+        <label z-form-label zRequired>Email</label>
+        <z-form-control>
+          <input z-input type="email" placeholder="Enter your email" formControlName="email" autocomplete="email"/>
+          @if (contactForm.get('email')?.invalid && contactForm.get('email')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (contactForm.get('email')?.errors?.['required']) {
+                Email is required.
+            }
+            @if (contactForm.get('email')?.errors?.['email']) {
+                Not a valid email address.
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
+        <label z-form-label zRequired>Message</label>
+        <z-form-control>
+          <textarea z-input rows="8" cols="12" placeholder="Enter your message" formControlName="message"></textarea>
+          @if (contactForm.get('message')?.invalid && contactForm.get('message')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (contactForm.get('message')?.errors?.['required']) {
+                Message is required.
+            }
+            @if (contactForm.get('message')?.errors?.['minlength']) {
+                Message must be at least ten characters
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+      
+      <z-form-field>
+        <label z-form-label zRequired>Which word here is <u class="underlined">underlined</u>?</label>
+        <z-form-control>
+          <input z-input type="text" placeholder="Bot test" formControlName="botTest" autocomplete="none"/>
+          @if (contactForm.get('botTest')?.invalid && contactForm.get('botTest')?.touched) {
+            <z-form-message class="text-red-500">
+            @if (contactForm.get('botTest')?.errors?.['required']) {
+                botTest is required.
+            }
+            </z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+
+      <div>
+        <button z-button zType="default" type="submit" [disabled]="contactForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer"><span class="icon-[bx--mail-send]"></span>Send</button>
+      </div>
+      
+    </form>
+  </div>
+
+</div>

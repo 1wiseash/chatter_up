@@ -1,7 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-// import * as admin from 'firebase-admin';
-// import { Timestamp } from 'firebase/firestore';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, query, orderBy, setDoc, addDoc, doc, getDoc, Timestamp, QuerySnapshot, getDocs } from 'firebase/firestore';
 import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';

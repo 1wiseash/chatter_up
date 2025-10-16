@@ -35,5 +35,8 @@ service cloud.firestore {
     match /user_profiles/{gameId} {
     	allow read, write: if true;
     }
+    match /messages/{messageId} {
+    	allow read, write: if true;
+    }
   }
 }
