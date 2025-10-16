@@ -8,6 +8,8 @@ import { userGuard } from './_core/guards/user-guard';
 import { PricingPage } from './pricing-page/pricing-page';
 import { MembersOnlyPage } from './members-only-page/members-only-page';
 import { HallOfFamePage } from './hall-of-fame-page/hall-of-fame-page';
+import { AboutPage } from './about-page/about-page';
+import { ContactUsPage } from './contact-us-page/contact-us-page';
 
 export const routes: Routes = [
     {
@@ -47,6 +49,16 @@ export const routes: Routes = [
         path: 'hall-of-fame',
         component: HallOfFamePage,
         title: 'Hall of Fame',
+    },
+    {
+        path: 'about',
+        component: AboutPage,
+        title: 'About',
+    },
+    {
+        path: 'contact-us',
+        component: ContactUsPage,
+        title: 'Contact Us',
     },
     {
         path: 'game',
