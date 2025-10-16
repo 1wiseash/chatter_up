@@ -1,0 +1,36 @@
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">
+        Greatest Hits Conversations
+        </h2>
+        <p class="text-xl text-gray-600">
+            Learn from the best conversations and see what high scoring chatting looks like
+        </p>
+    </div>
+    
+    <z-tab-group zAlignTabs="center">
+        <z-tab label="Business">
+            <div class="grid md:grid-cols-2 gap-6">
+                @for(userProfile of businessUserProfiles(); track userProfile.id) {
+                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                }
+            </div>
+        </z-tab>
+        <z-tab label="Dating">
+            <div class="grid md:grid-cols-2 gap-6">
+                @for(userProfile of datingUserProfiles(); track userProfile.id) {
+                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                }
+            </div>
+        </z-tab>
+        <z-tab label="Social">
+            <div class="grid md:grid-cols-2 gap-6">
+                @for(userProfile of socialUserProfiles(); track userProfile.id) {
+                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                }
+            </div>
+        </z-tab>
+    </z-tab-group>
+  </div>
+</section>

@@ -18,24 +18,24 @@ export class Lobby {
     socialGames = signal<ChatterUpGame[]>([]);
 
     constructor() {
-        this._gameService.getGreatistHits(GameType.business).then( (games => {
+        this._gameService.getGreatistHits(GameType.business).then( (games) => {
             // console.log('greatest hits:', games.map( g => g.score ));
             this.businessGames.set(games);
-        })).catch( (error) => {
+        }).catch( (error) => {
             console.error('Failed to retrieve business greatest hits:', error);
         });
 
-        this._gameService.getGreatistHits(GameType.dating).then( (games => {
+        this._gameService.getGreatistHits(GameType.dating).then( (games) => {
             // console.log('greatest hits:', games.map( g => g.score ));
             this.datingGames.set(games);
-        })).catch( (error) => {
+        }).catch( (error) => {
             console.error('Failed to retrieve dating greatest hits:', error);
         });
 
-        this._gameService.getGreatistHits(GameType.social).then( (games => {
+        this._gameService.getGreatistHits(GameType.social).then( (games) => {
             // console.log('greatest hits:', games.map( g => g.score ));
             this.socialGames.set(games);
-        })).catch( (error) => {
+        }).catch( (error) => {
             console.error('Failed to retrieve social greatest hits:', error);
         });
     }

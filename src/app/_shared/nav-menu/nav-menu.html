@@ -9,6 +9,7 @@
                 <a routerLink="home" z-menu-item>{{user()?.username}} Home</a>
             }
             <a z-menu-item routerLink="/arena/lobby">Arena</a>
+            <a z-menu-item routerLink="/hall-of-fame">Hall of Fame</a>
             <a z-menu-item routerLink="/game/lobby">Play Chatter Up!</a>
             <button z-menu-item (click)="aboutSelected()">About</button>
             @if (_authService.loggedIn()) {

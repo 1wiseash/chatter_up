@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { UserProfile } from '@models';
 
 // // Initialize the Firebase Admin SDK once if not already initialized
 // // In a typical Firebase Functions environment, this should be done globally.
@@ -21,6 +22,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 // const db = admin.firestore();
 const GAMES_COLLECTION = 'chatter_up_games';
 const GREATEST_HITS_COLLECTION = 'greatest_hits';
+const HALL_OF_FAME_COLLECTION = 'hall_of_fame';
 
 @Injectable({
   providedIn: 'root'
@@ -61,24 +63,12 @@ export class GameService {
         return `${GREATEST_HITS_COLLECTION}/${GameType[gameType]}/games`;
     }
 
-    async makeUpdates() {
-        // for (let gameId of this._userService.user.chatterUpGames) {
-        //     // Get a reference to the callable function
-        //     const updateTopTenGames = httpsCallable(this.functions, 'updateTopTenGames');
+    getHallOfFameCollectionPath(gameType: GameType) {
+        return `${HALL_OF_FAME_COLLECTION}/${GameType[gameType]}/users`;
+    }
 
-        //     // Call the function with the game ID
-        //     updateTopTenGames({ gameId })
-        //     .then((result) => {
-        //         // Read result data.
-        //         const data = result.data;
-        //         console.log('Result of updateTopTenGames function call:', data);
-        //     }).catch((error) => {
-        //         // Handle errors.
-        //         const code = error.code;
-        //         const message = error.message;
-        //         console.error('Error calling updateTopTenGames function call:', code, message);
-        //     });            
-        // }
+    async makeUpdates() {
+        this.updateHallOfFame(this._userService.user.id);
     }
 
     async getGame(gameId: string): Promise<ChatterUpGame> {
@@ -119,6 +109,25 @@ export class GameService {
         }
     }
 
+    async getHallOfFame(gameType: GameType): Promise<UserProfile[]> {
+        const hallOfFameCollectionRef = collection(this.db, this.getHallOfFameCollectionPath(gameType));
+
+        // Create a query to order the documents by the 'score' field in descending order
+        const q = query(hallOfFameCollectionRef, orderBy(`rank.${GameType[gameType]}`, 'desc'));
+
+        try {
+            const querySnapshot: QuerySnapshot<UserProfile> = await getDocs(q) as QuerySnapshot<UserProfile>;
+            const sortedUsers: UserProfile[] = [];
+            querySnapshot.forEach((userProfile) => {
+                sortedUsers.push(userProfile.data());
+            });
+            return sortedUsers;
+        } catch (error) {
+            console.error('Error getting sorted users:', error);
+            throw error;
+        }
+    }
+
     updateGreatestHits(gameId: string) {
         // Get a reference to the callable function
         const updateTopTenGames = httpsCallable(this.functions, 'updateTopTenGames');
@@ -133,6 +142,24 @@ export class GameService {
             const code = error.code;
             const message = error.message;
             console.error('Error calling updateTopTenGames function call:', code, message);
+        });            
+    }
+
+    updateHallOfFame(userId: string) {
+        // Get a reference to the callable function
+        const updateHallOfFame = httpsCallable(this.functions, 'updateHallOfFame');
+
+        // Call the function with the game ID
+        updateHallOfFame({ userId })
+        .then((result) => {
+            // Read result data.
+            const data = result.data;
+            console.log('Result of updateHallOfFame:', data);
+        }).catch((error) => {
+            // Handle errors.
+            const code = error.code;
+            const message = error.message;
+            console.error('Error calling updateHallOfFame function call:', code, message);
         });            
     }
 
@@ -215,6 +242,9 @@ export class GameService {
         }
         // NOTE: Game count was updated when game started
         this._userService.updateUser({chatterUpStats: stats});
+
+        // Update Hall of Fame
+        this.updateHallOfFame(this._userService.user.id);
 
         //Update top ten lists
         this.updateGreatestHits(this._currentChatterUpGame.value.id);

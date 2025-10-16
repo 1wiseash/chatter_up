@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LeaderBoard } from './leader-board';
+import { HallOfFamePage } from './hall-of-fame-page';
 
-describe('LeaderBoard', () => {
-  let component: LeaderBoard;
-  let fixture: ComponentFixture<LeaderBoard>;
+describe('HallOfFamePage', () => {
+  let component: HallOfFamePage;
+  let fixture: ComponentFixture<HallOfFamePage>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LeaderBoard]
+      imports: [HallOfFamePage]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LeaderBoard);
+    fixture = TestBed.createComponent(HallOfFamePage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

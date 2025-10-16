@@ -23,6 +23,15 @@ service cloud.firestore {
     match /greatest_hits/social/games/{gameId} {
     	allow read, write: if true;
     }
+    match /hall_of_fame/business/users/{userId} {
+    	allow read, write: if true;
+    }
+    match /hall_of_fame/dating/users/{userId} {
+    	allow read, write: if true;
+    }
+    match /hall_of_fame/social/users/{userId} {
+    	allow read, write: if true;
+    }
     match /user_profiles/{gameId} {
     	allow read, write: if true;
     }

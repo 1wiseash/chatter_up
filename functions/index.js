@@ -44,9 +44,15 @@ setGlobalOptions({maxInstances: 10});
 
 const GAMES_COLLECTION = "chatter_up_games";
 const GREATEST_HITS_COLLECTION = "greatest_hits";
+const USER_PROFILES_COLLECTION = "user_profiles";
+const HALL_OF_FAME_COLLECTION = "hall_of_fame";
 
 const getGreatHitCollectionPath = (gameType) => {
   return `${GREATEST_HITS_COLLECTION}/${gameType}/games`;
+};
+
+const getHallOfFameCollectionPath = (gameType) => {
+  return `${HALL_OF_FAME_COLLECTION}/${gameType}/users`;
 };
 
 /**
@@ -55,8 +61,6 @@ const getGreatHitCollectionPath = (gameType) => {
  * list.
  */
 exports.updateTopTenGames = onCall(async (request) => {
-  console.log("request:", request);
-
   // Validate that the request came from an authenticated user.
   if (!request.auth) {
     throw new HttpsError(
@@ -124,6 +128,123 @@ exports.updateTopTenGames = onCall(async (request) => {
   }
 });
 
+/**
+ * Callable function to add or update a user to the hall_of_fame collection.
+ * It reads the user's game stats from the "users" collection and manages the
+ * hall_of_fame lists.
+ */
+exports.updateHallOfFame = onCall(async (request) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the gameId from the client-side request.
+  const userId = request.data.userId;
+  if (!userId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a userId.",
+    );
+  }
+
+  const userProfileRef = db.collection(USER_PROFILES_COLLECTION).doc(userId);
+
+  // Use a transaction to ensure atomic reads and writes.
+  try {
+    await db.runTransaction(async (transaction) => {
+      // 1. Get the user data.
+      const userProfileDoc = await transaction.get(userProfileRef);
+      if (!userProfileDoc.exists) {
+        throw new HttpsError("not-found",
+            `User with ID ${userId} not found.`);
+      }
+      const userProfile = userProfileDoc.data();
+
+      // 2. Get the current top 10 users for each type of game, ordered by rank.
+      const hofBusinessQuery = db.collection(getHallOfFameCollectionPath(
+          "business")).orderBy("rank.business", "desc").limit(10);
+      const hofBusinessSnapshot = await transaction.get(hofBusinessQuery);
+
+      const hofDatingQuery = db.collection(getHallOfFameCollectionPath(
+          "dating")).orderBy("rank.dating", "desc").limit(10);
+      const hofDatingSnapshot = await transaction.get(hofDatingQuery);
+
+      const hofSocialQuery = db.collection(getHallOfFameCollectionPath(
+          "social")).orderBy("rank.social", "desc").limit(10);
+      const hofSocialSnapshot = await transaction.get(hofSocialQuery);
+
+      // 3. Determine if the user should be in any of the top 10s.
+      const shouldAddBusiness = hofBusinessSnapshot.size < 10 || userProfile.rank.business >
+            hofBusinessSnapshot.docs[hofBusinessSnapshot.size - 1].data().rank.business;
+
+      if (shouldAddBusiness) {
+        // If the list is full, remove the lowest-scoring game.
+        if (hofBusinessSnapshot.size >= 10) {
+          const lastBusinessUserDoc = hofBusinessSnapshot.docs[hofBusinessSnapshot.size - 1];
+          transaction.delete(db.collection(getHallOfFameCollectionPath(
+              "business")).doc(lastBusinessUserDoc.id));
+        }
+
+        // Add or update the user in the appropriate hall_of_fame collection.
+        // The user id can be used as the document ID for easy lookup.
+        const topTenBusinessUserRef = db.collection(getHallOfFameCollectionPath(
+            "business")).doc(userId);
+        transaction.set(topTenBusinessUserRef, userProfile);
+      }
+
+      const shouldAddDating = hofDatingSnapshot.size < 10 || userProfile.rank.dating >
+            hofDatingSnapshot.docs[hofDatingSnapshot.size - 1].data().rank.dating;
+
+      if (shouldAddDating) {
+        // If the list is full, remove the lowest-scoring game.
+        if (hofDatingSnapshot.size >= 10) {
+          const lastDatingUserDoc = hofDatingSnapshot.docs[hofDatingSnapshot.size - 1];
+          transaction.delete(db.collection(getHallOfFameCollectionPath(
+              "dating")).doc(lastDatingUserDoc.id));
+        }
+
+        // Add or update the user in the appropriate hall_of_fame collection.
+        // The user id can be used as the document ID for easy lookup.
+        const topTenDatingUserRef = db.collection(getHallOfFameCollectionPath(
+            "dating")).doc(userId);
+        transaction.set(topTenDatingUserRef, userProfile);
+      }
+
+      const shouldAddSocial = hofSocialSnapshot.size < 10 || userProfile.rank.social >
+            hofSocialSnapshot.docs[hofSocialSnapshot.size - 1].data().rank.social;
+
+      if (shouldAddSocial) {
+        // If the list is full, remove the lowest-scoring game.
+        if (hofSocialSnapshot.size >= 10) {
+          const lastSocialUserDoc = hofSocialSnapshot.docs[hofSocialSnapshot.size - 1];
+          transaction.delete(db.collection(getHallOfFameCollectionPath(
+              "social")).doc(lastSocialUserDoc.id));
+        }
+
+        // Add or update the user in the appropriate hall_of_fame collection.
+        // The user id can be used as the document ID for easy lookup.
+        const topTenSocialUserRef = db.collection(getHallOfFameCollectionPath(
+            "social")).doc(userId);
+        transaction.set(topTenSocialUserRef, userProfile);
+      }
+    });
+
+    return {success: true,
+      message: `Hall of Fame updated with user ID ${userId}`};
+  } catch (error) {
+    console.error(error);
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+    throw new HttpsError("internal",
+        "An unexpected error occurred.", error.message);
+  }
+});
+
 exports.compressImage = onObjectFinalized(async (event) => {
   const fileBucket = event.data.bucket; // The Storage bucket with the file.
   const filePath = event.data.name; // File path in the bucket.
@@ -173,9 +294,6 @@ exports.compressImage = onObjectFinalized(async (event) => {
   const compressedBuffer = await sharp(tempFilePath)
       .jpeg({quality: 80})
       .toBuffer();
-
-  //   const compressedFileName = `compressed_${fileName}`;
-  //   const compressedFilePath = join("/tmp", compressedFileName);
 
   console.log(`Uploading compressed image back to storage...`);
   await file.save(compressedBuffer, {

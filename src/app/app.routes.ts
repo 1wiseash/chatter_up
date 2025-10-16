@@ -7,6 +7,7 @@ import { guestGuard } from './_core/guards/guest-guard';
 import { userGuard } from './_core/guards/user-guard';
 import { PricingPage } from './pricing-page/pricing-page';
 import { MembersOnlyPage } from './members-only-page/members-only-page';
+import { HallOfFamePage } from './hall-of-fame-page/hall-of-fame-page';
 
 export const routes: Routes = [
     {
@@ -41,6 +42,11 @@ export const routes: Routes = [
         path: 'members-only',
         component: MembersOnlyPage,
         title: 'Members Only',
+    },
+    {
+        path: 'hall-of-fame',
+        component: HallOfFamePage,
+        title: 'Hall of Fame',
     },
     {
         path: 'game',
