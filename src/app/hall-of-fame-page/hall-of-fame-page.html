@@ -13,21 +13,21 @@
         <z-tab label="Business">
             <div class="grid md:grid-cols-2 gap-6">
                 @for(userProfile of businessUserProfiles(); track userProfile.id) {
-                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                    <cu-user-profile [userId]="userProfile.id" [showRank]="false"></cu-user-profile>
                 }
             </div>
         </z-tab>
         <z-tab label="Dating">
             <div class="grid md:grid-cols-2 gap-6">
                 @for(userProfile of datingUserProfiles(); track userProfile.id) {
-                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                    <cu-user-profile [userId]="userProfile.id" [showRank]="false"></cu-user-profile>
                 }
             </div>
         </z-tab>
         <z-tab label="Social">
             <div class="grid md:grid-cols-2 gap-6">
                 @for(userProfile of socialUserProfiles(); track userProfile.id) {
-                    <cu-user-profile [userId]="userProfile.id"></cu-user-profile>
+                    <cu-user-profile [userId]="userProfile.id" [showRank]="false"></cu-user-profile>
                 }
             </div>
         </z-tab>

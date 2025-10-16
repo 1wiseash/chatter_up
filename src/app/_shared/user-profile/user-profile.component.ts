@@ -24,6 +24,7 @@ export class UserProfileComponent implements OnInit {
     private _userService = inject(UserService);
 
     @Input() userId = this._userService.user.id;
+    @Input() showRank = true;
     @Input() showEdit = false;
 
     // --- State Signals ---

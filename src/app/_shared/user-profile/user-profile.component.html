@@ -29,11 +29,19 @@
                 <p class="text-gray-500 italic">
                     "{{userProfile().story}}"
                 </p>
-                <div class="text-xs">
-                    Business: {{userProfile().rank.business | currentSkillLevel}},
-                    Dating: {{userProfile().rank.dating | currentSkillLevel}},
-                    Social: {{userProfile().rank.social | currentSkillLevel}}
-                </div>
+                @if (showRank) {
+                    <div class="text-xs">
+                        Business: {{userProfile().rank.business | currentSkillLevel}},
+                        Dating: {{userProfile().rank.dating | currentSkillLevel}},
+                        Social: {{userProfile().rank.social | currentSkillLevel}}
+                    </div>
+                } @else {
+                    <div class="text-xs">
+                        Business: {{userProfile().rank.business}},
+                        Dating: {{userProfile().rank.dating}},
+                        Social: {{userProfile().rank.social}}
+                    </div>
+                }
             </div>
             
             @if(showEdit) {
