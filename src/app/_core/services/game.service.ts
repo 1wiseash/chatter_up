@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, query, orderBy, setDoc, addDoc, doc, getDoc, Timestamp, QuerySnapshot, getDocs } from 'firebase/firestore';
-import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, User } from '@models';
+import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, OpenAiPrompt, OpenAiResponse, User } from '@models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith } from 'rxjs/operators';
 import _ from 'lodash';
@@ -10,6 +10,8 @@ import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { UserProfile } from '@models';
+import { OpenAI } from 'openai';
+import { zodTextFormat } from 'openai/helpers/zod';
 
 // // Initialize the Firebase Admin SDK once if not already initialized
 // // In a typical Firebase Functions environment, this should be done globally.
@@ -31,6 +33,10 @@ export class GameService {
     readonly functions = getFunctions(this.app);
     readonly _userService = inject(UserService);
     readonly _authService = inject(AuthService);
+    readonly openai = new OpenAI({
+        apiKey: environment.openai.apiKey,
+        dangerouslyAllowBrowser: true
+    });
 
     private _currentChatterUpGame: BehaviorSubject<ChatterUpGame> = new BehaviorSubject(DEFAULT_CHATTER_UP_GAME);
     currentChatterUpGame$: Observable<ChatterUpGame> = this._currentChatterUpGame.asObservable();
@@ -164,6 +170,13 @@ export class GameService {
     async startChatterUp(environment: GameType): Promise<boolean> {
         const currentChatterUpGame = DEFAULT_CHATTER_UP_GAME;
 
+        try {
+            currentChatterUpGame.conversation = await this.openai.conversations.create();
+        } catch (error) {
+            console.error('Error creating OpenAI conversation:', error);
+            return Promise.reject();
+        }
+
         // 1. Prepare the data to save to server
         currentChatterUpGame.startTime = new Date();
         currentChatterUpGame.lastMessageTime = currentChatterUpGame.startTime;
@@ -258,7 +271,7 @@ export class GameService {
         let explanation: string | undefined = undefined;
         let response: ChatMessage | null = null;
         try {
-            ({score, explanation, response} = await this.calculateScore(message));
+            ({score, explanation, response} = await this.getFeedback(message));
         } catch (error) {
             console.error('Error scoring message:', error);
             return Promise.reject();
@@ -305,6 +318,7 @@ export class GameService {
     getGameFromFirestoreGame(fsGame: FirestoreChatterUpGame): ChatterUpGame {
         const game: ChatterUpGame = {
             id: fsGame.id,
+            conversation: fsGame.conversation,
             startTime: this.convertDate(fsGame.startTime),
             lastMessageTime: this.convertDate(fsGame.lastMessageTime),
             type: fsGame.type,
@@ -368,6 +382,44 @@ export class GameService {
         achievements.push({name: `The Conversationalist`, description: `Practice chatting 3 days in a row`, icon: ``, earned: Math.max(user.chatterUpStats.streakDays.business, user.chatterUpStats.streakDays.dating, user.chatterUpStats.streakDays.social) >= 3});
         achievements.push({name: `Talk Marathoner`, description: `Practice chatting 7 days in a row`, icon: ``, earned: Math.max(user.chatterUpStats.streakDays.business, user.chatterUpStats.streakDays.dating, user.chatterUpStats.streakDays.social) >= 7});
         return Promise.resolve(achievements);
+    }
+
+    async getFeedback(message: string): Promise<{score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string | undefined, response: ChatMessage | null}> {
+
+        // switch (this._currentChatterUpGame.value.type):
+        const prompt: OpenAiPrompt = environment.openai.prompts[this._currentChatterUpGame.value.type];
+        prompt.variables.scenario = this._currentChatterUpGame.value.scenario;
+
+        const response = await this.openai.responses.parse({
+            prompt,
+            input: [{
+                role: 'user',
+                content: message,
+            }],
+            text: {
+                format: zodTextFormat(OpenAiResponse, "coach_response"),
+            },
+            conversation: this._currentChatterUpGame.value.conversation?.id,
+        });
+        const parsedResponse = response.output_parsed as {score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string, response: string};
+        return Promise.resolve({
+            score: parsedResponse.score,
+            explanation: parsedResponse.explanation,
+            response: this.getCoachMessage(parsedResponse.response),
+        });
+    }
+
+    getCoachMessage(response: string): ChatMessage {
+        const newMessage: ChatMessage = {
+            ...DEFAULT_CHAT_MESSAGE,
+            timeSent: new Date(),
+            sender: 'coach',
+            text: response,
+            scored: false,
+            score: 0,
+        };
+        newMessage.id = this.currentChatterUpGame.id + '_coach_' + newMessage.timeSent.valueOf();
+        return newMessage;
     }
 
     // FAKER FUNCTIONS

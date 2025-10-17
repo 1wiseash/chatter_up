@@ -1,8 +1,16 @@
 import { Timestamp } from "firebase/firestore";
 import { MembershipType } from "./membership.models";
 import { User } from "./user.models";
+import OpenAI from "openai";
+import { z } from 'zod';
 
-export const CHATTER_UP_GAME_DURATION = 60000;
+export const OpenAiResponse = z.object({
+  'explanation': z.string(),
+  'score': z.number(),
+  'response': z.string(),
+});
+
+export const CHATTER_UP_GAME_DURATION = 60000 * 5;
 
 export enum GameType {
     business = 'business',
@@ -85,6 +93,7 @@ export const DEFAULT_CHAT_MESSAGE = {
 
 export type ChatterUpGame = {
   id: string;
+  conversation: OpenAI.Conversations.Conversation | null;
   startTime: Date;
   lastMessageTime: Date;
   type: GameType;
@@ -103,6 +112,7 @@ export type FirestoreChatterUpGame = Omit<ChatterUpGame, 'startTime' | 'lastMess
 
 export const DEFAULT_CHATTER_UP_GAME: ChatterUpGame = {
   id: '',
+  conversation: null,
   startTime: new Date(0),
   lastMessageTime: new Date(0),
   type: GameType.business,
@@ -121,4 +131,12 @@ export interface Achievement {
     description: string;
     icon: string;
     earned: boolean;
+}
+
+export interface OpenAiPrompt {
+  id: string;
+  version: string;
+  variables: {
+    scenario: string;
+  };
 }

@@ -23,7 +23,7 @@ export const MembershipPlans: MembershipInfo[] = [{
     }, {
         id: MembershipType.Paid,
         name: 'Paid',
-        monthlyPrice: 4.99,
+        monthlyPrice: 0, //4.99,
         description: 'Detailed coach feedback',
         features: ['Everything in Free',  'Detailed score explanations', 'Personal progress tracking', 'Conversation history', 'Weekly tips newsletter'],
         popular: true,
