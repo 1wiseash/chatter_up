@@ -10,7 +10,8 @@ export const environment = {
         measurementId: "G-V36RHPPESD"
     },
     openai: {
-        apiKey: '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',
+        secretName: 'openai_api_key',
+        projectId: '212324288165',
         prompts: {
             business: {
                 "id": "pmpt_68f16b2fb3948193a7be772331c832a9059f9228eb27216c",

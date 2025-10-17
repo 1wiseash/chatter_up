@@ -33,11 +33,8 @@ export class GameService {
     readonly functions = getFunctions(this.app);
     readonly _userService = inject(UserService);
     readonly _authService = inject(AuthService);
-    readonly openai = new OpenAI({
-        apiKey: environment.openai.apiKey,
-        dangerouslyAllowBrowser: true
-    });
-
+    openai!: OpenAI;
+    
     private _currentChatterUpGame: BehaviorSubject<ChatterUpGame> = new BehaviorSubject(DEFAULT_CHATTER_UP_GAME);
     currentChatterUpGame$: Observable<ChatterUpGame> = this._currentChatterUpGame.asObservable();
     get currentChatterUpGame() {
@@ -169,6 +166,18 @@ export class GameService {
 
     async startChatterUp(environment: GameType): Promise<boolean> {
         const currentChatterUpGame = DEFAULT_CHATTER_UP_GAME;
+        
+        try {
+            const key = await this.getOpenaiApiKey();
+            console.log('key', key);
+            this.openai = new OpenAI({
+                apiKey: key,
+                dangerouslyAllowBrowser: true,
+            });
+        } catch(error) {
+            console.error("Error getting OpenAI API key");
+            return Promise.reject();
+        }
 
         try {
             currentChatterUpGame.conversation = await this.openai.conversations.create();
@@ -422,67 +431,26 @@ export class GameService {
         return newMessage;
     }
 
-    // FAKER FUNCTIONS
-    async calculateScore(message: string): Promise<{score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string | undefined, response: ChatMessage | null}> {
-        const words = message.toLowerCase();
-        let score = 0;
-        let explanation: string | undefined = '';
-        
-        if (words.includes('screw')) {score: -999; explanation: 'Flagged for language'}
-        if (words.includes('?')) {score += 2; explanation += 'Included a question. ';}
-        if (words.includes('interesting') || words.includes('fascinating')) {score += 1; explanation += 'Included a keyword. ';}
-        if (words.includes('tell me') || words.includes('how') || words.includes('what') || words.includes('why')) {
-            score += 1;
-            explanation += 'Included an open-ended question. ';
-        }
-        if (words.length >= 50 && words.length < 200) {score += 1; explanation += 'Good length. ';}
-        if (words.length >= 200 && words.length < 400) {score -= 1; explanation += 'Response too long. ';}
-        if (words.length >= 400) {score -= 2; explanation += 'Response was an essay. ';}
-        if (words.includes('you') || words.includes('your')) {score += 1; explanation += 'Showed interest in other person. ';}
-        if (words.includes('ok') || words.includes('sure') || words.includes('yeah')) {score -= 1; explanation += 'Included meh words. ';}
-        if (words.length < 20) {score -= 1; explanation += 'Response was too short. ';}
+    async getOpenaiApiKey(): Promise<string> {
+      const projectId = environment.firebaseConfig.messagingSenderId;
+      const secretName = environment.openai.secretName;
 
-        // Clamp response
-        score = Math.max(-2, Math.min(2, score));
-        if (this.currentChatterUpGame.userMembershipLevel === MembershipType.Free) explanation = undefined;
-        const response = await this.getFakeCoachMessage();
+        // Get a reference to the callable function
+        const getSecret = httpsCallable(this.functions, 'getSecret');
 
-        return new Promise((resolve) => {
-            // Simulate network delay
-            setTimeout(() => {
-                // Resolve the promise, returning the data
-                resolve({score: score as -2 | -1 | 0 | 1 | 2 | -999, explanation, response});
-            }, Math.random() * 2000);
-        });
-    };
-
-    async getFakeCoachMessage(): Promise<ChatMessage> {
-        const responses = [
-            "That sounds really interesting! I'd love to hear more about what you're working on.",
-            "Wow, that's impressive! How did you get started in that field?",
-            "I've been curious about that area myself. What's the most exciting part of your work?",
-            "That's a great perspective! I hadn't thought about it that way before.",
-            "Fascinating! Are you working on any exciting projects right now?"
-        ];
-
-        return new Promise((resolve) => {
-            // Simulate network delay
-            setTimeout(() => {
-                // Resolve the promise, returning the data
-
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                const newBotMessage: ChatMessage = {
-                    ...DEFAULT_CHAT_MESSAGE,
-                    timeSent: new Date(),
-                    sender: 'coach',
-                    text: randomResponse,
-                    scored: false,
-                    score: 0,
-                };
-                newBotMessage.id = this.currentChatterUpGame.id + '_coach_' + newBotMessage.timeSent.valueOf();
-                resolve(newBotMessage);
-            }, Math.random() * 3000);
-        });
+        // Call the function with the game ID
+        return getSecret({ projectId, secretName })
+        .then((result) => {
+            // Read result data.
+            const data = result.data as string;
+            return Promise.resolve(data);
+        }).catch((error) => {
+            // Handle errors.
+            const code = error.code;
+            const message = error.message;
+            console.error('Error calling getSecret function call:', code, message);
+            return Promise.reject('Error calling getSecret function call');
+        });            
     }
 
 }

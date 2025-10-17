@@ -15,6 +15,8 @@ const {dirname, join, basename} = require("path");
 const sharp = require("sharp");
 const {existsSync, mkdirSync, unlinkSync} = require("fs");
 const {setGlobalOptions} = require("firebase-functions");
+const {SecretManagerServiceClient} = require("@google-cloud/secret-manager");
+
 // const {onRequest} = require("firebase-functions/https");
 // const logger = require("firebase-functions/logger");
 
@@ -308,3 +310,82 @@ exports.compressImage = onObjectFinalized(async (event) => {
 
   console.log(`Image at ${filePath} was replaced with a compressed version.`);
 });
+
+/**
+ * Callable function to get a Google Cloud Secret
+ */
+exports.getSecret = onCall(async (request) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the projectId from the client-side request.
+  const projectId = request.data.projectId;
+  if (!projectId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a projectId.",
+    );
+  }
+
+  // Get the secretName from the client-side request.
+  const secretName = request.data.secretName;
+  if (!secretName) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a secretName.",
+    );
+  }
+
+  const name = `projects/${projectId}/secrets/${secretName}/versions/latest`;
+
+  const client = new SecretManagerServiceClient();
+
+  try {
+    const [version] = await client.accessSecretVersion({name});
+    const payload = version.payload.data.toString();
+
+    if (!payload) {
+      throw new Error("Secret payload is empty or undefined.");
+    }
+
+    return payload;
+  } catch (error) {
+    console.error("Error accessing secret:", error);
+    throw error;
+  }
+});
+
+
+/**
+ * Callable function to get OpenAI response
+ */
+// exports.getFeedback = onCall(async (request) => {
+//   // Validate that the request came from an authenticated user.
+//   if (!request.auth) {
+//     throw new HttpsError(
+//         "unauthenticated",
+//         "The function must be called while authenticated.",
+//     );
+//   }
+
+//   // Get the message from the client-side request.
+//   const message = request.data.message;
+//   if (!message) {
+//     throw new HttpsError(
+//         "invalid-argument",
+//         "The function must be called with a message.",
+//     );
+//   }
+
+//   try {
+//     return payload;
+//   } catch (error) {
+//     console.error("Error getting feedback:", error);
+//     throw error;
+//   }
+// });

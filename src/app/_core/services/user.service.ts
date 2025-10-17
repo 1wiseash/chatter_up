@@ -120,7 +120,7 @@ export class UserService {
             const profileChanges: Partial<UserProfile> = {};
             if (changes.username) profileChanges['username'] = changes.username;
             if (changes.chatterUpStats) profileChanges['rank'] = {...changes.chatterUpStats.totalScores};
-            this.updateUserProfile({username: changes.username})
+            this.updateUserProfile(profileChanges);
         }
         return Promise.resolve();
       } else {

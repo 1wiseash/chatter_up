@@ -10,7 +10,7 @@ export const OpenAiResponse = z.object({
   'response': z.string(),
 });
 
-export const CHATTER_UP_GAME_DURATION = 60000 * 5;
+export const CHATTER_UP_GAME_DURATION = 60000 * 1;
 
 export enum GameType {
     business = 'business',
