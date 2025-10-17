@@ -1,5 +1,5 @@
-import { DatePipe } from '@angular/common';
-import { Component, computed, ElementRef, inject, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
+import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { Component, computed, ElementRef, inject, OnDestroy, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +14,8 @@ import { toast } from 'ngx-sonner';
 import _ from 'lodash';
 import { ZardAlertDialogService } from '@shared/components/alert-dialog/alert-dialog.service';
 import { GameOverComponent } from '../game-over.component/game-over.component';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'cu-chatterup',
@@ -26,11 +28,13 @@ import { GameOverComponent } from '../game-over.component/game-over.component';
     ZardInputDirective,
     ReactiveFormsModule,
     DatePipe,
+    AsyncPipe,
+    NgIf,
   ],
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'
 })
-export class Chatterup {
+export class Chatterup implements OnDestroy {
   @ViewChild('scrollAnchor') scrollAnchorRef!: ElementRef;
   
   private readonly _gameService = inject(GameService);
@@ -42,27 +46,31 @@ export class Chatterup {
 
   chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game().type)?.title);
 
-  elapsedTime = signal(0);
+  private _elapsedTime = new BehaviorSubject(0);
+  elapsedTime$ = this._elapsedTime.asObservable();
+
   timer: NodeJS.Timeout | undefined = undefined;
-  timeRemaining = computed( () => {
-    const t = this.game().timeRemaining - this.elapsedTime();
-    if (t <= 0) {
-      clearInterval(this.timer);
-      this.alertDialogService.info({
-        zContent: GameOverComponent,
-        zData: {user: this._userService.user, game: this.game()},
-        zOkText: 'Close',
-      });
-      this._gameService.endChatterUp();
-    }
-    return t;
-  });
+  timeRemaining$!: Observable<number>;
+  
+  constructor() {
+    this.timeRemaining$ = this.elapsedTime$.pipe(
+      map( (elapsedTime: number): number =>  this.game().timeRemaining - elapsedTime ),
+      tap( (t) => {
+        if (t <= 0) this.endGame();
+      }),
+    );
+    this._gameService.gameRunning = true;
+  }
+
+  ngOnDestroy(): void {
+      this.endGame();
+  }
 
   lastMessageCount = 0;
   chatMessages: Signal<ChatMessage[]> = computed( () => {
     const messages = this.game().messages;
     if (messages.length === 0 || messages.length !== this.lastMessageCount) {
-      this.timer = setInterval( () => this.elapsedTime.set(this.elapsedTime() + 1000), 1000);
+      this.timer = setInterval( () => this._elapsedTime.next(this._elapsedTime.value + 1000), 1000);
       this.lastMessageCount = messages.length;
     }
 
@@ -79,18 +87,28 @@ export class Chatterup {
     message: new FormControl('', [Validators.required]),
   });
 
+  endGame() {
+    clearInterval(this.timer);
+    this.alertDialogService.info({
+      zContent: GameOverComponent,
+      zData: {user: this._userService.user, game: this.game()},
+      zOkText: 'Close',
+    });
+    this._gameService.endChatterUp();
+  }
+
   async onSubmit() {
     if (this.messageForm.value?.message) {
       // Stop the countdown so user doesn't feel cheated by slow network access
       clearInterval(this.timer);
 
       // Send message to backend
-      toast.promise(this._gameService.sendMessage(this.messageForm.value.message, this.elapsedTime()), {
+      toast.promise(this._gameService.sendMessage(this.messageForm.value.message, this._elapsedTime.value), {
         loading: 'Submitting message...',
         success: (data: any) => {
           this.messageForm.patchValue({message: ''});
           this.messageForm.markAsUntouched();
-          this.elapsedTime.set(0);
+          this._elapsedTime.next(0);
           return `New response.`;
         },
         error: (error: any) => {

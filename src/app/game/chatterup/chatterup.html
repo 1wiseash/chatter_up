@@ -12,14 +12,16 @@ rounded-2xl shadow-2xl flex flex-col">
     <div class="flex justify-between items-center mb-1 px-4">
         <!-- Time -->
         <div class="flex items-center space-x-2">
+            <ng-container *ngIf="timeRemaining$ | async as timeRemaining">
             <span class="text-xl text-gray-500">Time Remaining:</span>
-            @if (timeRemaining() > 120) {
-                <span class="text-2xl font-mono font-bold text-green-600">{{formatTime(timeRemaining())}}</span>    
-            } @else if (timeRemaining() > 60) {
-                <span class="text-2xl font-mono font-bold text-orange-600">{{formatTime(timeRemaining())}}</span>    
-            } @else {
-                <span class="text-2xl font-mono font-bold text-red-600 animate-pulse">{{formatTime(timeRemaining())}}</span>
-            }
+                @if (timeRemaining > 120) {
+                    <span class="text-2xl font-mono font-bold text-green-600">{{formatTime(timeRemaining)}}</span>    
+                } @else if (timeRemaining > 60) {
+                    <span class="text-2xl font-mono font-bold text-orange-600">{{formatTime(timeRemaining)}}</span>    
+                } @else {
+                    <span class="text-2xl font-mono font-bold text-red-600 animate-pulse">{{formatTime(timeRemaining)}}</span>
+                }
+            </ng-container>
         </div>
 
         <!-- Score -->
@@ -33,7 +35,7 @@ rounded-2xl shadow-2xl flex flex-col">
     </div>
 
     <!-- Messages -->
-    <div class="space-y-4 mb-6 h-[75vh] overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
+    <div class="space-y-4 mb-6 h-[74vh] overflow-y-auto bg-gray-200 rounded-lg p-4 flex-1">
         @for (message of chatMessages(); track message.id) {
             <div class="flex"
                     [class.justify-end]="message.sender === 'user'"
@@ -85,7 +87,7 @@ rounded-2xl shadow-2xl flex flex-col">
                         formControlName="message" autocomplete="none"/>
             </z-form-control>
         </z-form-field>
-        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || timeRemaining() <= 0"
+        <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || !gameRunning()"
                 class="justify-center rounded-md bg-teal-500 mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">
             <span class="icon-[bx--mail-send]"></span>
             <span>Send</span>
