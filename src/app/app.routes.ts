@@ -69,4 +69,8 @@ export const routes: Routes = [
         path: 'arena',
         loadChildren: () => import('./arena/arena-module').then(m => m.ArenaModule),
     },
+    {
+        path: 'legal',
+        loadChildren: () => import('./legal/legal-module').then(m => m.LegalModule),
+    },
 ];

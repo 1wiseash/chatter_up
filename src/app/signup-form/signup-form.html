@@ -90,6 +90,36 @@
         </z-form-control>
       </z-form-field>
 
+      <z-form-field>
+        <z-form-control class="mt-2">
+          <span z-checkbox zShape="square" formControlName="privacyPolicy">
+              Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/privacy" routerLink="/legal/privacy">Privacy Policy</a>*
+          </span>
+          @if (signupForm.get('privacyPolicy')?.invalid && signupForm.get('privacyPolicy')?.touched) {
+            <z-form-message class="text-red-500">You must agree to the privacy policy to continue</z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+
+      <z-form-field>
+        <z-form-control class="mt-2">
+          <span z-checkbox zShape="square" formControlName="termsOfService">
+            Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/termsofservice" routerLink="/legal/termsofservice">Terms of Service</a>*
+          </span>
+          @if (signupForm.get('termsOfService')?.invalid && signupForm.get('termsOfService')?.touched) {
+            <z-form-message class="text-red-500">You must agree to the terms and conditions to continue</z-form-message>
+          }
+        </z-form-control>
+      </z-form-field>
+
+      <z-form-field>
+        <z-form-control class="mt-2">
+          <span z-checkbox zShape="square" formControlName="signUpForMarketing">
+            Sign up for conversation tips, specials, invitations, and relevant content
+          </span>
+        </z-form-control>
+      </z-form-field>
+
       <div>
         <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Sign up</button>
       </div>
