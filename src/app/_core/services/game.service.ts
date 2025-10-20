@@ -155,7 +155,7 @@ export class GameService {
         .then((result) => {
             // Read result data.
             const data = result.data;
-            console.log('Result of updateHallOfFame:', data);
+            // console.log('Result of updateHallOfFame:', data);
         }).catch((error) => {
             // Handle errors.
             const code = error.code;
@@ -169,7 +169,7 @@ export class GameService {
         
         try {
             const key = await this.getOpenaiApiKey();
-            console.log('key', key);
+            // console.log('key', key);
             this.openai = new OpenAI({
                 apiKey: key,
                 dangerouslyAllowBrowser: true,
@@ -199,7 +199,7 @@ export class GameService {
         try {
             // 2. Add the document. This returns a DocumentReference instantly.
             const docRef = await addDoc(collection(this.db, this.getGamesCollectionPath()), currentChatterUpGame);
-            console.log(`Game successfully added with temporary ID: ${docRef.id}`);
+            // console.log(`Game successfully added with temporary ID: ${docRef.id}`);
 
             // 3. Retrieve the full snapshot to get the data as saved by Firestore
             const docSnapshot = await getDoc(docRef);

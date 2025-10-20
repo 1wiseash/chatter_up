@@ -32,15 +32,11 @@ export class SigninForm {
   });
 
   async onSubmit() {
-    if (this.signinForm.valid) {
-      console.log('Form submitted:', this.signinForm.value);
-    }
     if (this.signinForm.value?.email && this.signinForm.value?.password) {
-      const newUser = await this._authService.logIn({email: this.signinForm.value.email, password: this.signinForm.value.password});
-      console.log('New user created:', newUser);
+      await this._authService.logIn({email: this.signinForm.value.email, password: this.signinForm.value.password});
       this._router.navigate(['/', 'home']);
     } else {
-      console.log('Form submitted:', this.signinForm.value);
+      console.warn('Form submitted:', this.signinForm.value);
     }
   }
   

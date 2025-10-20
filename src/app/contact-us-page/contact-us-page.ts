@@ -31,7 +31,7 @@ export class ContactUsPage {
 
     onSubmit() {
         if (this.contactForm.value.botTest !== 'underlined') return;
-        console.log(this.contactForm.value);
+        // console.log(this.contactForm.value);
         const message: Message = {
             ...DEFAULT_MESSAGE,
             fromName: this.contactForm.value.name as string,

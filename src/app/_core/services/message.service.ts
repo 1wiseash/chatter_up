@@ -30,7 +30,7 @@ export class MessageService {
         try {
             // 2. Add the document. This returns a DocumentReference instantly.
             const docRef = await addDoc(collection(this.db, this.getMessagesCollectionPath()), newMessage);
-            console.log(`Message successfully added with temporary ID: ${docRef.id}`);
+            // console.log(`Message successfully added with temporary ID: ${docRef.id}`);
 
             // 3. Retrieve the full snapshot to get the data as saved by Firestore
             const docSnapshot = await getDoc(docRef);

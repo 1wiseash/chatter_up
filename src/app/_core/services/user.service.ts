@@ -53,7 +53,7 @@ export class UserService {
                         // console.log("Document data:", docSnap.data());
                         return docSnap.data() as User;
                     } else {
-                        console.log("No such document!");
+                        console.error("No such document!");
                         return GUEST_USER;
                     }
                 } catch (error) {
@@ -138,7 +138,7 @@ export class UserService {
             // console.log("Document data:", docSnap.data());
             return docSnap.data() as UserProfile;
         } else {
-            console.log("No such document!");
+            console.error("No such document!");
             return Promise.reject(GUEST_USER)
         }
     }
