@@ -9,7 +9,6 @@ import { confirmPasswordValidator } from '@util';
 import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
 import { RouterLink } from '@angular/router';
 import { AuthService, SubscriptionService, UserService } from '@services';
-import { ZardCheckboxComponent } from '@shared/components/checkbox/checkbox.component';
 
 
 @Component({
@@ -21,7 +20,6 @@ import { ZardCheckboxComponent } from '@shared/components/checkbox/checkbox.comp
     ZardFormModule,
     ZardPopoverComponent,
     ZardPopoverDirective,
-    ZardCheckboxComponent,
     RouterLink,
   ],
   providers: [AuthService],
@@ -43,9 +41,9 @@ export class SignupForm {
             Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/) // Example for strong password
           ]),
       confirmPassword: new FormControl('', [Validators.required]),
-      privacyPolicy: new FormControl('', {validators: [Validators.requiredTrue]}),
-      termsOfService: new FormControl('', {validators: [Validators.requiredTrue]}),
-      signUpForMarketing: new FormControl(''),
+      privacyPolicy: new FormControl(false, {validators: [Validators.requiredTrue]}),
+      termsOfService: new FormControl(false, {validators: [Validators.requiredTrue]}),
+      signUpForMarketing: new FormControl(false),
     },
     { validators: confirmPasswordValidator }
   );
