@@ -9,7 +9,7 @@
       <z-form-field>
         <label z-form-label zRequired>Email</label>
         <z-form-control>
-          <input z-input type="email" placeholder="Enter your email" formControlName="email" />
+          <input z-input type="email" name="email" placeholder="Enter your email" required formControlName="email" autocomplete="email"/>
           @if (signinForm.get('email')?.invalid && signinForm.get('email')?.touched) {
             <z-form-message class="text-red-500">
             @if (signinForm.get('email')?.errors?.['required']) {
@@ -27,7 +27,7 @@
         <label z-form-label zRequired class="inline w-auto m-0 p-0">Password</label>
         
         <z-form-control>
-            <input z-input type="password" name="password" required autocomplete="current-password" formControlName="password" />
+            <input z-input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password" formControlName="password" />
             @if (signinForm.get('password')?.invalid && signinForm.get('password')?.touched) {
                 @if (signinForm.get('password')?.errors?.['required']) {
                     <z-form-message class="text-red-500">Password is required.</z-form-message>
