@@ -24,19 +24,6 @@ export class NavMenu {
     // Convert the Observable to a Signal
     readonly user = toSignal(this.user$);
 
-    settingsSelected() {
-        console.log('settingsSelected method not implemented.');
-    }
-    aboutSelected() {
-        console.log('aboutSelected method not implemented.');
-    }
-    practiceSelected() {
-        console.log('practiceSelected method not implemented.');
-    }
-    watchSelected() {
-        console.log('watchSelected method not implemented.');
-    }
-
     logOut() {
         this._authService.logOut();
         this._router.navigate(['/']);
