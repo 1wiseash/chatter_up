@@ -234,6 +234,8 @@ export class GameService {
     }
 
     async endChatterUp() {
+        if (!this._gameRunning.value) return;
+        
         this._gameRunning.next(false);
 
         // Update user stats
@@ -245,14 +247,14 @@ export class GameService {
             stats.streakDays[this._currentChatterUpGame.value.type] = 1;
         } else {
             let streakExtended = false;
-            for (let gameId of this._userService.user.chatterUpGames) {
+            for (let gameId of this._userService.user.chatterUpGames.reverse()) {
                 try {
                     const game = await this.getGame(gameId);
                     if (game.type === this._currentChatterUpGame.value.type) {
-                        if (this._currentChatterUpGame.value.startTime.valueOf() - game.startTime.valueOf() < 1000 * 60 * 60 * 24) {
-                            streakExtended = true;
-                            break;
-                        }
+                        const timeDiff = this._currentChatterUpGame.value.startTime.valueOf() - game.startTime.valueOf();
+                        streakExtended = timeDiff < 1000 * 60 * 60 * 24 &&
+                                this._currentChatterUpGame.value.startTime.getDay() !== game.startTime.getDay();
+                        break;
                     }
                 } catch (error) {
                     console.warn('May have computed streak days incorrectly');
