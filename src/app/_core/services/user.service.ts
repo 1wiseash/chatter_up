@@ -53,10 +53,13 @@ export class UserService {
                         // console.log("Document data:", docSnap.data());
                         return docSnap.data() as User;
                     } else {
-                        console.error("No such document!");
+                        console.error("No user record for id ", authUser.uid);
+                        this.forceLogout();
                         return GUEST_USER;
                     }
                 } catch (error) {
+                    console.error("Error getting document:", error);
+                    this.forceLogout();
                     return GUEST_USER;
                 }
             } else {
@@ -76,6 +79,10 @@ export class UserService {
             // console.log('User data updated to:', this._user.value);
         }),
     );
+
+    forceLogout() {
+        this._authService.logOut();
+    }
 
     get user() {
         return _.cloneDeep(this._user.value);

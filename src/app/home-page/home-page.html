@@ -95,7 +95,7 @@
         <!-- Recent Sessions -->
         <z-card zTitle="Recent Practice Sessions" class="text-center">
             <div class="space-y-3">
-              @for (game of recentGames(); track game.id) {
+              @for (game of recentGames(); track $index) {
                 <div class="flex items-center justify-between bg-gray-50 shadow-sm p-2 cursor-pointer hover:scale-110 hover:shadow-md" routerLink="/arena/watch" [state]="{game}">
                   <div class="flex items-center space-x-2">
                     <cu-game-type [gameType]="game.type"></cu-game-type>

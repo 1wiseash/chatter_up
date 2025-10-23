@@ -1,10 +1,10 @@
 <div class="relative bg-white">
     <button z-button z-menu zTrigger="hover" [zMenuTriggerFor]="navMenu">
-        <span class="icon-[bx--menu]"></span>
+        <span class="icon-[bx--menu] text-2xl"></span>
     </button>
 
     <ng-template #navMenu>
-        <div z-menu-content class="w-48 bg-white *:hover:bg-teal-500">
+        <div z-menu-content class="w-48 bg-white *:hover:bg-teal-500 *:text-xl">
             <a z-menu-item routerLink="/game/lobby">Play Chatter Up!</a>
             <a z-menu-item routerLink="/arena/lobby">Arena</a>
             <a z-menu-item routerLink="/hall-of-fame">Hall of Fame</a>

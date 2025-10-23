@@ -38,10 +38,10 @@ export class AuthService {
         );
 
         //Check to see if user was logged in recently
-        const storedUser = isPlatformBrowser(this._platformId) ? localStorage.getItem('authUser') : null;
-        if (storedUser) {
-            this._setAuthUser(JSON.parse(storedUser));
-        }
+        // const storedUser = isPlatformBrowser(this._platformId) ? localStorage.getItem('authUser') : null;
+        // if (storedUser) {
+        //     this._setAuthUser(JSON.parse(storedUser));
+        // }
 
         //Set up a listener to authState just in case you get logged out without hitting logout
         this._auth.onAuthStateChanged( ( authUser => {
@@ -94,6 +94,7 @@ export class AuthService {
             const result = await signInWithEmailAndPassword(this._auth, authData.email.toLowerCase().trim(), authData.password);
             // console.log('Success in auth.service.logIn:', result);
             this._setAuthUser(result.user);
+            this.loggedIn.set(true);
             return result.user;
         } catch (error) {
             console.error('Error in auth.service.logIn:', error);
@@ -105,6 +106,9 @@ export class AuthService {
         // if (!this.loggedIn()) {
         //     throw new Error('Possible illegal state: tried to log out, but not logged in!');
         // }
+        console.log('Logging out user ', this._authUser.value?.uid);
+        this.loggedIn.set(false);
+        this._setAuthUser(null);
         this._auth.signOut();
     }
 
