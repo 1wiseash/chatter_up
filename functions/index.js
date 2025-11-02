@@ -7,7 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 const {firestore} = require("firebase-admin");
-const {onCall, HttpsError} = require("firebase-functions/https");
+const {onCall, HttpsError, onRequest} = require("firebase-functions/https");
 const {onObjectFinalized} = require("firebase-functions/v2/storage");
 const {initializeApp} = require("firebase-admin/app");
 const {getStorage} = require("firebase-admin/storage");
@@ -16,6 +16,27 @@ const sharp = require("sharp");
 const {existsSync, mkdirSync, unlinkSync} = require("fs");
 const {setGlobalOptions} = require("firebase-functions");
 const {SecretManagerServiceClient} = require("@google-cloud/secret-manager");
+const stripeLib = require("stripe");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCGuKQb5nKUWmhKOtjc1yKjP4lNbEsCO4k",
+  authDomain: "chatter-up-70a2f.firebaseapp.com",
+  projectId: "chatter-up-70a2f",
+  storageBucket: "chatter-up-70a2f.firebasestorage.app",
+  messagingSenderId: "212324288165",
+  appId: "1:212324288165:web:6c00a077ffc28125242f4c",
+  measurementId: "G-V36RHPPESD",
+};
+
+const stripeInfo = {
+  STRIPE_PUBLISHABLE_KEY: "pk_live_NKcZnKGuuFH8Q8AU9C5cPYJB",
+  STRIPE_SECRET_KEY_NAME: "stripe_secret_key",
+  STRIPE_TEST_PUBLISHABLE_KEY: "pk_test_FwGIQeNsaDdByaIg3Jfnvb3b",
+  STRIPE_TEST_SECRET_KEY_NAME: "stripe_test_secret_key",
+  PAID_PRICE_ID: "prod_TJTe5cIedbYpaY",
+  PREMIUM_PRICE_ID: "prod_TJTqqJb41z0qUu",
+  WHS_NAME: "stripe_webhook_secret",
+};
 
 // const {onRequest} = require("firebase-functions/https");
 // const logger = require("firebase-functions/logger");
@@ -312,6 +333,32 @@ exports.compressImage = onObjectFinalized(async (event) => {
 });
 
 /**
+ * Fetch the secret value from Google Cloud Secret Manager
+ * @param {string} projectId: GCP project ID
+ * @param {string} secretName: name of the secret in Secret Manager
+ * @return {Promise<string>} secret payload
+ */
+async function getSecret(projectId, secretName) {
+  const name = `projects/${projectId}/secrets/${secretName}/versions/latest`;
+
+  const client = new SecretManagerServiceClient();
+
+  try {
+    const [version] = await client.accessSecretVersion({name});
+    const payload = version.payload.data.toString();
+
+    if (!payload) {
+      throw new Error("Secret payload is empty or undefined.");
+    }
+
+    return Promise.resolve(payload);
+  } catch (error) {
+    console.error("Error accessing secret:", error);
+    throw error;
+  }
+}
+
+/**
  * Callable function to get a Google Cloud Secret
  */
 exports.getSecret = onCall(async (request) => {
@@ -341,25 +388,14 @@ exports.getSecret = onCall(async (request) => {
     );
   }
 
-  const name = `projects/${projectId}/secrets/${secretName}/versions/latest`;
-
-  const client = new SecretManagerServiceClient();
-
   try {
-    const [version] = await client.accessSecretVersion({name});
-    const payload = version.payload.data.toString();
-
-    if (!payload) {
-      throw new Error("Secret payload is empty or undefined.");
-    }
-
-    return payload;
+    const secret = await getSecret(projectId, secretName);
+    return {secret};
   } catch (error) {
-    console.error("Error accessing secret:", error);
+    console.error("Error getting secret:", error);
     throw error;
   }
 });
-
 
 /**
  * Callable function to get OpenAI response
@@ -389,3 +425,229 @@ exports.getSecret = onCall(async (request) => {
 //     throw error;
 //   }
 // });
+
+/**
+ * Initialize Stripe with secret key from Secret Manager
+ * @return {Promise<string>} secret key
+ */
+async function initializeStripe() {
+  const stripeSecretKey = await getSecret(firebaseConfig.messagingSenderId, stripeInfo.STRIPE_TEST_SECRET_KEY_NAME);
+
+  const stripe = stripeLib(stripeSecretKey, {
+    apiVersion: "2020-08-27",
+    appInfo: {
+      name: "Chatter Up!",
+      version: "1.0.0",
+      url: "https://chatterup.net",
+    },
+  });
+  return Promise.resolve(stripe);
+}
+
+/**
+ * Callable function to fetch Stripe subscription plan
+ */
+exports.getPlanDetails = onCall(async (request, response) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the sessionId from the client-side request
+  const planId = request.data.planId;
+  if (!planId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a planId.",
+    );
+  }
+
+  try {
+    const stripe = await initializeStripe();
+    const plan = await stripe.plans.retrieve(planId);
+    return {
+      publishableKey: stripeInfo.STRIPE_TEST_PUBLISHABLE_KEY,
+      plan,
+    };
+  } catch (error) {
+    console.error("Error fetching Stripe plans:", error);
+    throw error;
+  }
+});
+
+/**
+ * Callable function to create a Stripe Customer
+ */
+exports.createStripeCustomer = onCall(async (request, response) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the name from the client-side request
+  const name = request.data.name;
+  if (!name) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with an name.",
+    );
+  }
+
+  // Get the email from the client-side request
+  const email = request.data.email;
+  if (!email) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with an email.",
+    );
+  }
+
+  try {
+    const stripe = await initializeStripe();
+    const customer = await stripe.customers.create({
+      name,
+      email,
+    });
+
+    // Create a SetupIntent to set up our payment methods recurring usage
+    const setupIntent = await stripe.setupIntents.create({
+      payment_method_types: ["card"],
+      customer: customer.id,
+    });
+
+    return {customer, setupIntent};
+  } catch (error) {
+    console.error("Error creating Stripe customer:", error);
+    throw error;
+  }
+});
+
+/**
+ * Callable function to create Stripe Subscription
+ */
+exports.createStripeSubscription = onCall(async (request, response) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the customerId from the client-side request
+  const customerId = request.data.customerId;
+  if (!customerId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a customerId.",
+    );
+  }
+
+  // Get the paymentMethodId from the client-side request
+  const paymentMethodId = request.data.paymentMethodId;
+  if (!paymentMethodId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a paymentMethodId.",
+    );
+  }
+
+  // Get the planId from the client-side request
+  const planId = request.data.planId;
+  if (!planId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a planId.",
+    );
+  }
+
+  try {
+    const stripe = await initializeStripe();
+    // Set the default payment method on the customer
+    await stripe.customers.update(customerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
+      },
+    });
+
+    // Create the subscription
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{plan: planId}],
+      expand: ["latest_invoice.payment_intent"],
+      trial_period_days: 3,
+    });
+    return subscription;
+  } catch (error) {
+    console.error("Error creating Stripe subscription:", error);
+    throw error;
+  }
+});
+
+/**
+ * Webhooks endpoint to handle Stripe events
+ */
+exports.stripeWebhook = onRequest(async (request, response) => {
+  const webhookSecret = await exports.getSecret(firebaseConfig.messagingSenderId, stripeInfo.WHS_NAME);
+
+  // Retrieve the event by verifying the signature using the raw body and secret.
+  let event;
+
+  try {
+    const stripe = await initializeStripe();
+    event = stripe.webhooks.constructEvent(
+        request.body,
+        request.headers["stripe-signature"],
+        webhookSecret,
+    );
+  } catch (err) {
+    console.error(`⚠️  Webhook signature verification failed.`);
+    return response.sendStatus(400);
+  }
+  // Extract the object from the event.
+  const dataObject = event.data.object;
+
+  // Handle the event
+  // Review important events for Billing webhooks
+  // https://stripe.com/docs/billing/webhooks
+  // Remove comment to see the various objects sent for this sample
+  switch (event.type) {
+    case "customer.created":
+      console.log(`✅ Successfully created customer: ${dataObject.id}`);
+      break;
+    case "customer.updated":
+      // console.log(dataObject);
+      break;
+    case "setup_intent.created":
+      // console.log(dataObject);
+      break;
+    case "invoice.upcoming":
+      // console.log(dataObject);
+      break;
+    case "invoice.created":
+      // console.log(dataObject);
+      break;
+    case "invoice.finalized":
+      // console.log(dataObject);
+      break;
+    case "invoice.payment_succeeded":
+      console.log(dataObject);
+      break;
+    case "invoice.payment_failed":
+      console.log(dataObject);
+      break;
+    case "customer.subscription.created":
+      console.log(`✅ Successfully created subscription: ${dataObject.id}`);
+      break;
+    // ... handle other event types
+    default:
+      console.warn("Unexpected event:", event);
+  }
+  response.sendStatus(200);
+});

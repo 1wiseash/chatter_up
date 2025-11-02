@@ -4,6 +4,8 @@ import { MembershipService, UserService } from '@services';
 import { MembershipInfo, MembershipPlans, MembershipType, User } from '@models';
 import { toast } from 'ngx-sonner';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ZardAlertDialogService } from '@shared/components/alert-dialog/alert-dialog.service';
+import { PaymentComponent } from '@shared/payment.component/payment.component';
 
 @Component({
   selector: 'cu-pricing-page',
@@ -15,13 +17,19 @@ export class PricingPage {
   readonly plans = MembershipPlans;
   private readonly _userService = inject(UserService);
   private readonly _membershipService = inject(MembershipService);
+  private readonly _alertDialogService = inject(ZardAlertDialogService);
 
   // Convert the Observable to a Signal
   readonly user = toSignal(this._userService.user$);
 
   async upgrade(plan: MembershipInfo) {
-    const updated = await this._membershipService.purchaseMembership(plan)
-    toast('Changed to ' + plan.name);
+    this._alertDialogService.info({
+      zContent: PaymentComponent,
+      zData: {plan},
+      zOkText: 'Close',
+    });
+    // const updated = await this._membershipService.purchaseMembership(plan)
+    // toast('Changed to ' + plan.name);
   }
 
   getCallToAction(plan: MembershipInfo): string {

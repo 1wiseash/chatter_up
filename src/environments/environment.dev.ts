@@ -40,5 +40,8 @@ export const environment = {
             },
         },
     },
-    stripeKey: 'pk_test_FwGIQeNsaDdByaIg3Jfnvb3b',
+    stripe: {
+        publicKey: 'pk_test_FwGIQeNsaDdByaIg3Jfnvb3b',
+        secretName: 'stripe_private_key',
+    },
 };

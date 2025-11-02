@@ -36,5 +36,8 @@ export const environment = {
             },
         },
     },
-    stripeKey: 'pk_live_NKcZnKGuuFH8Q8AU9C5cPYJB',
+    stripe: {
+        publicKey: 'pk_live_NKcZnKGuuFH8Q8AU9C5cPYJB',
+        secretName: 'stripe_private_key',
+    },
 };

@@ -1,0 +1,49 @@
+<div class="stripe-styling">
+    <div class="sr-root">
+      <div class="sr-main">
+        <header class="sr-header">
+          <div class="sr-header__logo"></div>
+        </header>
+        <div class="sr-payment-summary sr-form">
+          <h1 class="order-amount">Subscribe to the {{plan.name}} plan</h1>
+          <h4>{{plan.description}}</h4>
+          <p>{{orderAmount()}}</p>
+        </div>
+
+        <!-- Personal Information Form -->
+        <div id="signup-view" class="sr-form" [class.hidden]="personalInfoSubmitted() || paymentSucceeded()">
+
+                <form id="signup-form" [formGroup]="personalInfoForm" (ngSubmit)="submitPersonalInfo()" class="space-y-6">
+                    <div class="sr-form-row">
+                        <div class="sr-combo-inputs">
+                        <input id="name" type="text" placeholder="Name" formControlName="name" autocomplete="off" class="sr-input" required/>
+                        <input id="email" type="email" placeholder="Enter your email" formControlName="email" autocomplete="email" class="sr-input" required/>
+                        </div>
+                    </div>
+                </form>
+            <button (click)="submitPersonalInfo()" type="submit" [disabled]="!personalInfoForm.valid || isLoading()">Signup</button>
+        </div>
+
+        <!-- Payment Form -->
+        <div id="payment-view" class="sr-form" [class.hidden]="!personalInfoSubmitted() || paymentSucceeded()">
+            <form id="payment-form">
+                <div class="sr-form-row payment-info card visible">
+                    <div class="sr-combo-inputs">
+                    <div class="sr-combo-inputs-row">
+                        <div class="sr-input sr-element" id="card-element"></div>
+                    </div>
+                    </div>
+                </div>
+                <div id="error-message" class="sr-field-error" role="alert">{{errorMessage()}}</div>
+                <button class="bg-teal-600 text-white" (click)="submitPaymentInfo()" type="button">
+                    <div id="spinner" class="hidden" [class.loading]="isLoading()"></div>
+                    <span id="button-text" [class.hidden]="isLoading()">Subscribe</span>
+                </button>
+            </form>
+        </div>
+        <div class="sr-payment-summary completed-view" [class.hidden]="!paymentSucceeded()">
+            <h1>Your subscription is <span class="order-status">{{orderStatus()}}</span></h1>
+        </div>
+      </div>
+    </div>
+</div>

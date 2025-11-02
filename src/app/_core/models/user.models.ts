@@ -17,6 +17,7 @@ export enum SkillLevel {
 
 export interface User {
     id: string;
+    name?: string;
     username: string;
     chatterUpGames: string[];
     chatterUpStats: {
