@@ -5,7 +5,7 @@ import { ChatterUpGame, User } from '@models';
 import { Z_ALERT_MODAL_DATA } from '@shared/components/alert-dialog/alert-dialog.service';
 import { GameService, UserService } from '@services';
 
-interface iDialogData {
+interface GameOverComponentDialogData {
   game: ChatterUpGame;
   user: User;
 }
@@ -17,7 +17,7 @@ interface iDialogData {
   styleUrl: './game-over.component.css'
 })
 export class GameOverComponent {
-    zData = inject(Z_ALERT_MODAL_DATA) as iDialogData;
+    zData = inject(Z_ALERT_MODAL_DATA) as GameOverComponentDialogData;
 
     user = this.zData.user;
     game = this.zData.game;

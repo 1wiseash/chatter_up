@@ -39,7 +39,7 @@ export class Chatterup implements OnDestroy {
   
   private readonly _gameService = inject(GameService);
   private readonly _userService = inject(UserService);
-  private alertDialogService = inject(ZardAlertDialogService);
+  private readonly _alertDialogService = inject(ZardAlertDialogService);
 
   game: Signal<ChatterUpGame> = toSignal(this._gameService.currentChatterUpGame$) as Signal<ChatterUpGame>;
   gameRunning = toSignal(this._gameService.gameRunning$) as Signal<boolean>;
@@ -89,7 +89,7 @@ export class Chatterup implements OnDestroy {
 
   endGame() {
     clearInterval(this.timer);
-    this.alertDialogService.info({
+    this._alertDialogService.info({
       zContent: GameOverComponent,
       zData: {user: this._userService.user, game: this.game()},
       zOkText: 'Close',
