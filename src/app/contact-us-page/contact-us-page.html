@@ -60,7 +60,7 @@
       <z-form-field>
         <label z-form-label zRequired>Which word here is <u class="underlined">underlined</u>?</label>
         <z-form-control>
-          <input z-input type="text" placeholder="Bot test" formControlName="botTest" autocomplete="none"/>
+          <input z-input type="text" placeholder="Bot test" formControlName="botTest" autocomplete="off"/>
           @if (contactForm.get('botTest')?.invalid && contactForm.get('botTest')?.touched) {
             <z-form-message class="text-red-500">
             @if (contactForm.get('botTest')?.errors?.['required']) {

@@ -26,7 +26,7 @@
       <z-form-field>
         <label z-form-label zRequired>Username</label>
         <z-form-control>
-          <input z-input type="text" placeholder="Username" formControlName="username" autocomplete="none"/>
+          <input z-input type="text" placeholder="Username" formControlName="username" autocomplete="off"/>
           @if (signupForm.get('username')?.invalid && signupForm.get('username')?.touched) {
             <z-form-message class="text-red-500">
             @if (signupForm.get('username')?.errors?.['required']) {
