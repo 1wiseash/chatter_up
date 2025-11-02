@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal, OnInit, inject, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { DEFAULT_USER_PROFILE } from '@models';
+import { DEFAULT_AVATAR, DEFAULT_USER_PROFILE } from '@models';
 import { CurrentSkillLevelPipe } from '@pipes';
 import { UserService } from '@services';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
@@ -31,8 +31,7 @@ export class UserProfileComponent implements OnInit {
     isLoading = signal(true);
     userProfile = signal(DEFAULT_USER_PROFILE);
   
-    readonly defaultAvatar = '/assets/img/logo.png';
-    avatarUrl = signal(this.defaultAvatar);
+    avatarUrl = signal(DEFAULT_AVATAR);
   
     statusMessage = signal('Loading user data...');
     isError = signal(false);
@@ -57,7 +56,7 @@ export class UserProfileComponent implements OnInit {
         try {
             const profile = await this._userService.getUserProfile(this.userId);
             this.userProfile.set(profile);
-            this.avatarUrl.set(profile.avatarURL);
+            this.avatarUrl.set(await this._userService.getAvatarUrl());
             this.isLoading.set(false);
             // Set a general success message if no specific status has been set during data fetching
             this.updateStatus(`Welcome back, ${profile.username}!`);
@@ -75,7 +74,7 @@ export class UserProfileComponent implements OnInit {
   
     // Handles avatar image loading errors by resetting to default placeholder
     handleImageError(): void {
-        this.avatarUrl.set(this.defaultAvatar);
+        this.avatarUrl.set(DEFAULT_AVATAR);
         this.updateStatus("Avatar image not found or failed to load. Showing default.", false);
     }
 

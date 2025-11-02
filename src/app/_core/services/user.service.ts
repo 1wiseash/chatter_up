@@ -3,7 +3,7 @@ import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, setDoc, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, FirebaseStorage, uploadBytes } from 'firebase/storage';
-import { Achievement, DEFAULT_USER, DEFAULT_USER_PROFILE, GUEST_USER, MembershipType, User, UserProfile } from '../models';
+import { Achievement, DEFAULT_AVATAR, DEFAULT_USER, DEFAULT_USER_PROFILE, GUEST_USER, MembershipType, User, UserProfile } from '../models';
 import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
 import { tap, switchMap, startWith, shareReplay } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -161,7 +161,7 @@ export class UserService {
       }
     }
 
-    async getAvatarUrl(userId?: string): Promise<string | null> {
+    async getAvatarUrl(userId?: string): Promise<string> {
         if (!userId) userId = this._authService.uid;
         const avatarRef = ref(this.storage, this.getUserAvatarPath(userId));
         
@@ -171,14 +171,14 @@ export class UserService {
         } catch (error) {
             // Log the warning and return null, letting the (error) binding on the <img> handle the fallback.
             console.warn("Error fetching avatar URL (likely file not found):", (error as any).code);
-            return null; 
+            return DEFAULT_AVATAR; 
         }
     }
 
     async saveAvatar(fileSelected: File) {
+        const url = this.getUserAvatarPath()
+        const avatarRef = ref(this.storage, url);
         try {
-            const url = await this.getAvatarUrl() as string;
-            const avatarRef = ref(this.storage, url);
             await uploadBytes(avatarRef, fileSelected);
             await this.updateUserProfile({avatarURL: url});
         } catch(error) {

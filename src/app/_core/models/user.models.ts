@@ -29,6 +29,8 @@ export interface User {
     membershipLevel: MembershipType;
 }
 
+export const DEFAULT_AVATAR = '/assets/img/logo.png';
+
 export const DEFAULT_USER: User = {
     id: '',
     username: '',
@@ -65,7 +67,7 @@ export interface UserProfile {
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
     id: '',
-    avatarURL: '/assets/img/logo.png',
+    avatarURL: DEFAULT_AVATAR,
     username: '',
     story: 'On the journey to be a better conversationalist.',
     rank: {'business': 0, 'dating': 0, 'social': 0},
