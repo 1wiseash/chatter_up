@@ -13,6 +13,7 @@ import {
     reauthenticateWithCredential,
     sendPasswordResetEmail,
     updatePassword,
+    signOut,
 } from "firebase/auth";
 
 import { AuthData, SafeText } from '@models';
@@ -45,9 +46,13 @@ export class AuthService {
 
         //Set up a listener to authState just in case you get logged out without hitting logout
         this._auth.onAuthStateChanged( ( authUser => {
-            // console.log('onAuthStateChanged. authUser:', authUser);
+            console.log('onAuthStateChanged. authUser:', authUser);
+            
             this._setAuthUser(authUser);
+            console.log('_authUser after onAuthStateChanged:', this._authUser.value);
+
             this.loggedIn.set(authUser !== null);
+            console.log('loggedIn signal set to ', this.loggedIn());
         }) );
     }
 
@@ -102,14 +107,21 @@ export class AuthService {
         }
     }
 
-    logOut() {
+    async logOut() {
         // if (!this.loggedIn()) {
         //     throw new Error('Possible illegal state: tried to log out, but not logged in!');
         // }
         console.log('Logging out user ', this._authUser.value?.uid);
-        this.loggedIn.set(false);
-        this._setAuthUser(null);
-        this._auth.signOut();
+        // this.loggedIn.set(false);
+        // this._setAuthUser(null);
+        try {
+            await signOut(this._auth);
+            console.log('Success in auth.service.logOut');
+            return Promise.resolve();
+        } catch (error) {
+            console.error('Error in auth.service.logOut:', error);
+            return Promise.reject(error);
+        }
     }
 
     private _setAuthUser(authUser: User | null) {
@@ -117,18 +129,18 @@ export class AuthService {
         if (!this.loggedIn() && authUser && authUser.uid !== this._authUser.value?.uid) {
             // console.log('Logging in user ' + authUser.uid);
             this._authUser.next(authUser);
-            if(isPlatformBrowser(this._platformId)) {
-                localStorage.setItem('authUser', JSON.stringify(authUser));
-            }
+            // if(isPlatformBrowser(this._platformId)) {
+            //     localStorage.setItem('authUser', JSON.stringify(authUser));
+            // }
             return;
         }
 
         if (this.loggedIn() && !authUser) {
             // console.log('Logging out user ' + this._authUser.value?.uid);
             this._authUser.next(null);
-            if(isPlatformBrowser(this._platformId)) {
-                localStorage.removeItem('authUser');
-            }
+            // if(isPlatformBrowser(this._platformId)) {
+            //     localStorage.removeItem('authUser');
+            // }
             return;
         }
 
@@ -136,9 +148,9 @@ export class AuthService {
             if (authUser.uid !== this._authUser.value?.uid) {
                 console.error('Possible error! User was logged in but authUser changed.');
                 this._authUser.next(authUser);
-                if(isPlatformBrowser(this._platformId)) {
-                    localStorage.setItem('authUser', JSON.stringify(authUser));
-                }
+                // if(isPlatformBrowser(this._platformId)) {
+                //     localStorage.setItem('authUser', JSON.stringify(authUser));
+                // }
             }
         }
     }
