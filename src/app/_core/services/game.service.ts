@@ -309,7 +309,6 @@ export class GameService {
         currentChatterUpGame.timeRemaining -= elapsedTime;
 
         try {
-            const result = await setDoc(doc(this.db, this.getGamePath()), currentChatterUpGame);
             const docSnapshot = await getDoc(doc(this.db, this.getGamePath()));
             if (docSnapshot.exists()) {
                 const firestoreGame = docSnapshot.data() as FirestoreChatterUpGame;
