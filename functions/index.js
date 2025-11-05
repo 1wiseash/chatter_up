@@ -17,6 +17,8 @@ const {existsSync, mkdirSync, unlinkSync} = require("fs");
 const {setGlobalOptions} = require("firebase-functions");
 const {SecretManagerServiceClient} = require("@google-cloud/secret-manager");
 const stripeLib = require("stripe");
+const {OpenAI} = require("openai");
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCGuKQb5nKUWmhKOtjc1yKjP4lNbEsCO4k",
@@ -36,6 +38,34 @@ const stripeInfo = {
   PAID_PRICE_ID: "prod_TJTe5cIedbYpaY",
   PREMIUM_PRICE_ID: "prod_TJTqqJb41z0qUu",
   WHS_NAME: "stripe_webhook_secret",
+};
+
+const openAiConfig = {
+  secretName: "openai_api_key",
+  projectId: "212324288165",
+  prompts: {
+    business: {
+      "id": "pmpt_68f16b2fb3948193a7be772331c832a9059f9228eb27216c",
+      "version": "3",
+      "variables": {
+        "scenario": "example scenario",
+      },
+    },
+    dating: {
+      "id": "pmpt_68f16f185cb48196bfec8da82f62245e0a8fa33e2447d124",
+      "version": "2",
+      "variables": {
+        "scenario": "example scenario",
+      },
+    },
+    social: {
+      "id": "pmpt_68f171f323c48196ae8658fd5295906f0f98ff411680f0ea",
+      "version": "3",
+      "variables": {
+        "scenario": "example scenario",
+      },
+    },
+  },
 };
 
 // const {onRequest} = require("firebase-functions/https");
@@ -398,33 +428,94 @@ exports.getSecret = onCall(async (request) => {
 });
 
 /**
+ * Callable function to start a new OpenAI conversation
+ */
+exports.startConversation = onCall(async (request) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  try {
+    const openAiApiKey = await getSecret(firebaseConfig.messagingSenderId, openAiConfig.secretName);
+    const openai = new OpenAI({
+      apiKey: openAiApiKey,
+    });
+
+    const conversation = await openai.conversations.create();
+    return conversation;
+  } catch (error) {
+    console.error("Error creating OpenAI conversation:", error);
+    throw error;
+  }
+});
+
+/**
  * Callable function to get OpenAI response
  */
-// exports.getFeedback = onCall(async (request) => {
-//   // Validate that the request came from an authenticated user.
-//   if (!request.auth) {
-//     throw new HttpsError(
-//         "unauthenticated",
-//         "The function must be called while authenticated.",
-//     );
-//   }
+exports.getFeedback = onCall(async (request) => {
+  console.log("request data:", request.data);
 
-//   // Get the message from the client-side request.
-//   const message = request.data.message;
-//   if (!message) {
-//     throw new HttpsError(
-//         "invalid-argument",
-//         "The function must be called with a message.",
-//     );
-//   }
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
 
-//   try {
-//     return payload;
-//   } catch (error) {
-//     console.error("Error getting feedback:", error);
-//     throw error;
-//   }
-// });
+  // Get the prompt from the client-side request.
+  const prompt = request.data.prompt;
+  if (!prompt) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a prompt.",
+    );
+  }
+
+  // Get the conversationId from the client-side request.
+  const conversationId = request.data.conversationId;
+  if (!conversationId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a conversationId.",
+    );
+  }
+
+  // Get the message from the client-side request.
+  const message = request.data.message;
+  if (!message) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a message.",
+    );
+  }
+
+  try {
+    const openAiApiKey = await getSecret(firebaseConfig.messagingSenderId, openAiConfig.secretName);
+    const openai = new OpenAI({
+      apiKey: openAiApiKey,
+    });
+    const response = await openai.responses.parse({
+      prompt,
+      input: [{
+        role: "user",
+        content: message,
+      }],
+      conversation: conversationId,
+    });
+    console.log("OpenAI response:", response);
+    const openBraceIndex = response.output_text.indexOf("{");
+    const closeBraceIndex = response.output_text.lastIndexOf("}");
+    return JSON.parse(response.output_text.slice(openBraceIndex, closeBraceIndex + 1).replaceAll("\n", ""));
+  } catch (error) {
+    console.error("Error getting feedback:", error);
+    throw error;
+  }
+});
 
 /**
  * Initialize Stripe with secret key from Secret Manager

@@ -26,7 +26,7 @@ export const MembershipPlans: MembershipInfo[] = [{
         comingSoon: false,
     }, {
         id: MembershipType.Paid,
-        stripePlanId: '',
+        stripePlanId: 'price_1SMqhcJcBOj7rqgxxb3GVRfS',
         stripePlanTestId: 'price_1SOhsxJcBOj7rqgxWUYtNVut',
         name: 'Paid',
         monthlyPrice: 4.99,
@@ -36,7 +36,7 @@ export const MembershipPlans: MembershipInfo[] = [{
         comingSoon: false,
     }, {
         id: MembershipType.Premium,
-        stripePlanId: '',
+        stripePlanId: 'price_1SMqtDJcBOj7rqgxtjZQgyp1',
         name: 'Premium',
         monthlyPrice: 7.49,
         description: 'Access to all features',

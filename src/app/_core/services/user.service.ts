@@ -67,13 +67,16 @@ export class UserService {
             }
         }),
         shareReplay(1),
-        // tap( async (user) => {
-        //     // Update user record for missing or bad data
-        //     if (this._authService.authUser) {
-        //         user.id = this._authService.uid;
-        //         await setDoc(doc(this.db, USERS_COLLECTION_PATH, this._authService.authUser.uid), user);
-        //     }
-        // }),
+        tap( async (user) => {
+            if (this._authService.authUser) {
+                // Update user record for missing or bad data
+                if (user.options === undefined) {
+                    this.updateUser({options: {autohideFeedback: false}});
+                } else if (user.options.autohideFeedback === undefined) {
+                    this.updateUser({options: {...user.options, autohideFeedback: false}});
+                }
+            }
+        }),
         tap( async (user) => {
             this._user.next(user);
             // console.log('User data updated to:', this._user.value);

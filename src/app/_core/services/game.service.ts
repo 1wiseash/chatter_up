@@ -2,22 +2,15 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, query, orderBy, setDoc, addDoc, doc, getDoc, Timestamp, QuerySnapshot, getDocs } from 'firebase/firestore';
-import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, DEFAULT_USER, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, GUEST_USER, MembershipInfo, MembershipType, OpenAiPrompt, OpenAiResponse, User } from '@models';
-import { Observable, BehaviorSubject, lastValueFrom, Subject, combineLatest } from 'rxjs';
-import { tap, switchMap, startWith } from 'rxjs/operators';
+import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, OpenAiPrompt, User } from '@models';
+import { Observable, BehaviorSubject } from 'rxjs';
 import _ from 'lodash';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { UserProfile } from '@models';
 import { OpenAI } from 'openai';
-import { zodTextFormat } from 'openai/helpers/zod';
 
-// // Initialize the Firebase Admin SDK once if not already initialized
-// // In a typical Firebase Functions environment, this should be done globally.
-// if (!admin.apps.length) {
-//     admin.initializeApp(environment.firebaseConfig);
-// }
 
 // const db = admin.firestore();
 const GAMES_COLLECTION = 'chatter_up_games';
@@ -33,7 +26,6 @@ export class GameService {
     readonly functions = getFunctions(this.app);
     readonly _userService = inject(UserService);
     readonly _authService = inject(AuthService);
-    openai!: OpenAI;
     
     private _currentChatterUpGame: BehaviorSubject<ChatterUpGame> = new BehaviorSubject(DEFAULT_CHATTER_UP_GAME);
     currentChatterUpGame$: Observable<ChatterUpGame> = this._currentChatterUpGame.asObservable();
@@ -166,21 +158,13 @@ export class GameService {
 
     async startChatterUp(environment: GameType): Promise<boolean> {
         const currentChatterUpGame = DEFAULT_CHATTER_UP_GAME;
+
+        // Get a reference to the callable function
+        const startConversation = httpsCallable<void, OpenAI.Conversations.Conversation>(this.functions, 'startConversation');
         
         try {
-            const key = await this.getOpenaiApiKey();
-            // console.log('key', key);
-            this.openai = new OpenAI({
-                apiKey: key,
-                dangerouslyAllowBrowser: true,
-            });
-        } catch(error) {
-            console.error("Error getting OpenAI API key");
-            return Promise.reject();
-        }
-
-        try {
-            currentChatterUpGame.conversation = await this.openai.conversations.create();
+            const response = await startConversation();
+            currentChatterUpGame.conversation = response.data;
         } catch (error) {
             console.error('Error creating OpenAI conversation:', error);
             return Promise.reject();
@@ -199,7 +183,6 @@ export class GameService {
         try {
             // 2. Add the document. This returns a DocumentReference instantly.
             const docRef = await addDoc(collection(this.db, this.getGamesCollectionPath()), currentChatterUpGame);
-            // console.log(`Game successfully added with temporary ID: ${docRef.id}`);
 
             // 3. Retrieve the full snapshot to get the data as saved by Firestore
             const docSnapshot = await getDoc(docRef);
@@ -208,14 +191,6 @@ export class GameService {
                 console.error("IDs don't match:", docRef, docSnapshot);
                 throw new Error(`Failed to retrieve document with ID ${docRef.id} after creation.`);
             }
-
-            // // 4. Combine the ID with the data and return
-            // const retrievedData = docSnapshot.data() as ChatterUpGame;
-            
-            // // Convert Firestore Timestamp object back to a JS Date object for external use
-            // const createdDate = retrievedData.createdAt instanceof admin.firestore.Timestamp 
-            //     ? retrievedData.createdAt.toDate() 
-            //     : retrievedData.createdAt;
 
             currentChatterUpGame.id = docSnapshot.id;
             this._currentChatterUpGame.next(currentChatterUpGame);
@@ -226,6 +201,7 @@ export class GameService {
             const stats = this._userService.user.chatterUpStats;
             stats.gameCounts[currentChatterUpGame.type]++;
             this._userService.updateUser({chatterUpGames: games, chatterUpStats: stats});
+
             return Promise.resolve(true);
         } catch (error) {
             console.error("Error creating game record:", error);
@@ -309,6 +285,7 @@ export class GameService {
         currentChatterUpGame.timeRemaining -= elapsedTime;
 
         try {
+            await setDoc(doc(this.db, this.getGamePath()), currentChatterUpGame);
             const docSnapshot = await getDoc(doc(this.db, this.getGamePath()));
             if (docSnapshot.exists()) {
                 const firestoreGame = docSnapshot.data() as FirestoreChatterUpGame;
@@ -396,26 +373,19 @@ export class GameService {
 
     async getFeedback(message: string): Promise<{score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string | undefined, response: ChatMessage | null}> {
 
-        // switch (this._currentChatterUpGame.value.type):
         const prompt: OpenAiPrompt = environment.openai.prompts[this._currentChatterUpGame.value.type];
         prompt.variables.scenario = this._currentChatterUpGame.value.scenario;
 
-        const response = await this.openai.responses.parse({
-            prompt,
-            input: [{
-                role: 'user',
-                content: message,
-            }],
-            text: {
-                format: zodTextFormat(OpenAiResponse, "coach_response"),
-            },
-            conversation: this._currentChatterUpGame.value.conversation?.id,
-        });
-        const parsedResponse = response.output_parsed as {score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string, response: string};
+        // Get a reference to the callable function
+        const getFeedbackFn = httpsCallable<{prompt: OpenAiPrompt, message: string, conversationId: string},
+                {score: -2 | -1 | 0 | 1 | 2 | -999, explanation: string, response: string}>(this.functions, 'getFeedback');
+
+        const response = await getFeedbackFn({prompt, message, conversationId: this._currentChatterUpGame.value.conversation.id});
+        const data = response.data;
         return Promise.resolve({
-            score: parsedResponse.score,
-            explanation: parsedResponse.explanation,
-            response: this.getCoachMessage(parsedResponse.response),
+            score: data.score,
+            explanation: data.explanation,
+            response: this.getCoachMessage(data.response),
         });
     }
 
@@ -430,28 +400,6 @@ export class GameService {
         };
         newMessage.id = this.currentChatterUpGame.id + '_coach_' + newMessage.timeSent.valueOf();
         return newMessage;
-    }
-
-    async getOpenaiApiKey(): Promise<string> {
-      const projectId = environment.firebaseConfig.messagingSenderId;
-      const secretName = environment.openai.secretName;
-
-        // Get a reference to the callable function
-        const getSecret = httpsCallable(this.functions, 'getSecret');
-
-        // Call the function with the game ID
-        return getSecret({ projectId, secretName })
-        .then((result) => {
-            // Read result data.
-            const data = result.data as string;
-            return Promise.resolve(data);
-        }).catch((error) => {
-            // Handle errors.
-            const code = error.code;
-            const message = error.message;
-            console.error('Error calling getSecret function call:', code, message);
-            return Promise.reject('Error calling getSecret function call');
-        });            
     }
 
 }
