@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
-import { Component, computed, ElementRef, inject, OnDestroy, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, Component, computed, ElementRef, inject, OnDestroy, QueryList, Signal, signal, ViewChild, ViewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { ZardButtonComponent } from '@shared/components/button/button.component'
 import { ZardFormModule } from '@shared/components/form/form.module';
 import { ZardInputDirective } from '@shared/components/input/input.directive';
 import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
-import { ChatMessage, GameTypeInfo, GameType, environments, ChatterUpGame } from '@models';
+import { ChatMessage, GameTypeInfo, GameType, environments, ChatterUpGame, MembershipType } from '@models';
 import { GameService, UserService } from '@services';
 import { toast } from 'ngx-sonner';
 import _ from 'lodash';
@@ -35,8 +35,9 @@ import { FeedbackComponent } from '../feedback.component/feedback.component';
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'
 })
-export class Chatterup implements OnDestroy {
+export class Chatterup implements OnDestroy, AfterContentInit {
   @ViewChild('scrollAnchor') scrollAnchorRef!: ElementRef;
+  @ViewChild('inputAnchor') inputAnchorRef!: ElementRef;
 
   private readonly _gameService = inject(GameService);
   private readonly _userService = inject(UserService);
@@ -65,6 +66,10 @@ export class Chatterup implements OnDestroy {
     this._gameService.gameRunning = true;
   }
 
+  ngAfterContentInit(): void {
+    this.inputAnchorRef && this.inputAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
   ngOnDestroy(): void {
       this.endGame();
   }
@@ -72,7 +77,7 @@ export class Chatterup implements OnDestroy {
   lastMessageCount = 0;
   chatMessages: Signal<ChatMessage[]> = computed( () => {
     const messages = this.game().messages;
-    if (this._userService.user.options?.autohideFeedback) {
+    if (this._userService.user.options?.autohideFeedback || this._userService.user.membershipLevel === MembershipType.Free) {
       this.restartTimer(messages.length);
     } else {
       if (messages.length !== this.lastMessageCount && messages.length > 1) {
@@ -97,6 +102,7 @@ export class Chatterup implements OnDestroy {
 
     // Scroll last message and input box into view once they have had a chance to be updated
     setTimeout( () => {
+      this.inputAnchorRef && this.inputAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
       this.scrollAnchorRef && this.scrollAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 1)
     return messages;

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { initializeApp } from '@firebase/app';
 import { getFirestore, collection, query, orderBy, setDoc, addDoc, doc, getDoc, Timestamp, QuerySnapshot, getDocs } from 'firebase/firestore';
-import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, OpenAiPrompt, User } from '@models';
+import { Achievement, ChatMessage, ChatterUpGame, DEFAULT_CHAT_MESSAGE, DEFAULT_CHATTER_UP_GAME, environments, FirestoreChatterUpGame, GameType, GameTypeInfo, MembershipType, OpenAiPrompt, User } from '@models';
 import { Observable, BehaviorSubject } from 'rxjs';
 import _ from 'lodash';
 import { UserService } from './user.service';
@@ -275,7 +275,7 @@ export class GameService {
             flagged: score === -999,
         };
         
-        if (explanation !== undefined) newUserMessage.explanation = explanation;
+        if (this._userService.user.membershipLevel !== MembershipType.Free) newUserMessage.explanation = explanation;
         currentChatterUpGame.messages.push(newUserMessage);
         response && currentChatterUpGame.messages.push(response as ChatMessage);
         currentChatterUpGame.lastMessageTime = response ? response.timeSent : newUserMessage.timeSent;
