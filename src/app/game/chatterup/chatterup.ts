@@ -16,6 +16,7 @@ import { ZardAlertDialogService } from '@shared/components/alert-dialog/alert-di
 import { GameOverComponent } from '../game-over.component/game-over.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { FeedbackComponent } from '../feedback.component/feedback.component';
 
 @Component({
   selector: 'cu-chatterup',
@@ -36,7 +37,7 @@ import { map, tap } from 'rxjs/operators';
 })
 export class Chatterup implements OnDestroy {
   @ViewChild('scrollAnchor') scrollAnchorRef!: ElementRef;
-  
+
   private readonly _gameService = inject(GameService);
   private readonly _userService = inject(UserService);
   private readonly _alertDialogService = inject(ZardAlertDialogService);
@@ -45,6 +46,8 @@ export class Chatterup implements OnDestroy {
   gameRunning = toSignal(this._gameService.gameRunning$) as Signal<boolean>;
 
   chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game().type)?.title);
+
+  autohideFeedback = this._userService.user.options?.autohideFeedback;
 
   private _elapsedTime = new BehaviorSubject(0);
   elapsedTime$ = this._elapsedTime.asObservable();
@@ -69,16 +72,32 @@ export class Chatterup implements OnDestroy {
   lastMessageCount = 0;
   chatMessages: Signal<ChatMessage[]> = computed( () => {
     const messages = this.game().messages;
-    if (messages.length === 0 || messages.length !== this.lastMessageCount) {
-      this.timer = setInterval( () => this._elapsedTime.next(this._elapsedTime.value + 1000), 1000);
-      this.lastMessageCount = messages.length;
+    if (this._userService.user.options?.autohideFeedback) {
+      this.restartTimer(messages.length);
+    } else {
+      if (messages.length !== this.lastMessageCount && messages.length > 1) {
+        const lastMessage = messages[messages.length - 2];
+        this._alertDialogService.info({
+          zContent: FeedbackComponent,
+          zData: {
+            feedback: lastMessage.explanation || 'No feedback provided.',
+            message: lastMessage.text,
+            score: lastMessage.score,
+            autohideFeedback: this._userService.user.options?.autohideFeedback,
+          },
+          zOkText: 'Got it',
+          zOnOk: () => {
+            this.restartTimer(messages.length);
+          },
+        });
+      } else {
+        this.restartTimer(messages.length);
+      }
     }
 
-    // Scroll last message into view once they have had a chance to be updated
+    // Scroll last message and input box into view once they have had a chance to be updated
     setTimeout( () => {
-      if (this.scrollAnchorRef) {
-        this.scrollAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }
+      this.scrollAnchorRef && this.scrollAnchorRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 1)
     return messages;
   });
@@ -86,6 +105,18 @@ export class Chatterup implements OnDestroy {
   messageForm = new FormGroup({
     message: new FormControl('', [Validators.required]),
   });
+
+  restartTimer(messageCount: number) {
+    if (messageCount !== this.lastMessageCount) {
+      this.timer = setInterval( () => this._elapsedTime.next(this._elapsedTime.value + 1000), 1000);
+      this.lastMessageCount = messageCount;
+    }
+  }
+
+  toggleAutohide() {
+    this.autohideFeedback = !this.autohideFeedback;
+    this._userService.updateUser({options: {autohideFeedback: this.autohideFeedback}});
+  }
 
   endGame() {
     clearInterval(this.timer);

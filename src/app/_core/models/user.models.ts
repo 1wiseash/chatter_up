@@ -20,6 +20,9 @@ export interface User {
     name?: string;
     username: string;
     chatterUpGames: string[];
+    options?: {
+        autohideFeedback?: boolean;
+    };
     chatterUpStats: {
         bestScores: {'business': number, 'dating': number, 'social': number},
         totalScores: {'business': number, 'dating': number, 'social': number},

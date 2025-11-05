@@ -46,13 +46,13 @@ export class AuthService {
 
         //Set up a listener to authState just in case you get logged out without hitting logout
         this._auth.onAuthStateChanged( ( authUser => {
-            console.log('onAuthStateChanged. authUser:', authUser);
+            // console.log('onAuthStateChanged. authUser:', authUser);
             
             this._setAuthUser(authUser);
-            console.log('_authUser after onAuthStateChanged:', this._authUser.value);
+            // console.log('_authUser after onAuthStateChanged:', this._authUser.value);
 
             this.loggedIn.set(authUser !== null);
-            console.log('loggedIn signal set to ', this.loggedIn());
+            // console.log('loggedIn signal set to ', this.loggedIn());
         }) );
     }
 
