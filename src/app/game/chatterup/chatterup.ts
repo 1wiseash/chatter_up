@@ -48,7 +48,10 @@ export class Chatterup implements OnDestroy, AfterContentInit {
 
   chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game().type)?.title);
 
-  autohideFeedback = this._userService.user.options?.autohideFeedback;
+  autohideFeedback$ = this._userService.user$.pipe(
+    map( user => user.options?.autohideFeedback || false ),
+    tap ( autohideFeedback => console.log('AutohideFeedback$ option is now:', autohideFeedback) ),
+  );
 
   private _elapsedTime = new BehaviorSubject(0);
   elapsedTime$ = this._elapsedTime.asObservable();
@@ -88,7 +91,7 @@ export class Chatterup implements OnDestroy, AfterContentInit {
             feedback: lastMessage.explanation || 'No feedback provided.',
             message: lastMessage.text,
             score: lastMessage.score,
-            autohideFeedback: this._userService.user.options?.autohideFeedback,
+            autohideFeedback: this._userService.user.options?.autohideFeedback || false,
           },
           zOkText: 'Got it',
           zOnOk: () => {
@@ -120,8 +123,7 @@ export class Chatterup implements OnDestroy, AfterContentInit {
   }
 
   toggleAutohide() {
-    this.autohideFeedback = !this.autohideFeedback;
-    this._userService.updateUser({options: {autohideFeedback: this.autohideFeedback}});
+    this._userService.updateUser({options: {autohideFeedback: !this._userService.user.options?.autohideFeedback}});
   }
 
   endGame() {
