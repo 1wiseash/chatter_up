@@ -9,7 +9,7 @@
       <z-form-field>
         <label z-form-label zRequired>Email</label>
         <z-form-control>
-          <input z-input type="email" placeholder="Enter your email" formControlName="email" autocomplete="email"/>
+          <input z-input type="email" placeholder="Enter your email" formControlName="email" autocomplete="email" tabindex="1" cu-autofocus />
           @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
             <z-form-message class="text-red-500">
             @if (signupForm.get('email')?.errors?.['required']) {
@@ -26,7 +26,7 @@
       <z-form-field>
         <label z-form-label zRequired>Username</label>
         <z-form-control>
-          <input z-input type="text" placeholder="Username" formControlName="username" autocomplete="off"/>
+          <input z-input type="text" placeholder="Username" formControlName="username" autocomplete="off" tabindex="2"/>
           @if (signupForm.get('username')?.invalid && signupForm.get('username')?.touched) {
             <z-form-message class="text-red-500">
             @if (signupForm.get('username')?.errors?.['required']) {
@@ -57,7 +57,7 @@
           </z-popover>
         </ng-template>
         <z-form-control>
-            <input z-input type="password" name="password" required formControlName="password" autocomplete="new-password"/>
+            <input z-input type="password" name="password" required formControlName="password" autocomplete="new-password" tabindex="3"/>
             @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
                 <z-form-message class="text-red-500">
                 @if (signupForm.get('password')?.errors?.['required']) {
@@ -77,7 +77,7 @@
       <z-form-field>
         <label z-form-label zRequired class="mb-[-8px]">Confirm Password</label>
         <z-form-control class="mt-2">
-          <input z-input type="password" name="password-confirm" required formControlName="confirmPassword" autocomplete="off"/>
+          <input z-input type="password" name="password-confirm" required formControlName="confirmPassword" autocomplete="off" tabindex="4"/>
           @if (signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched) {
             @if (signupForm.get('confirmPassword')?.errors?.['required']) {
                 <z-form-message class="text-red-500">Confirm Password is required.</z-form-message>
@@ -92,8 +92,8 @@
 
       <div>
         <label>
-          <input type="checkbox" formControlName="privacyPolicy" />
-          Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/privacy" routerLink="/legal/privacy">Privacy Policy</a>*
+          <input type="checkbox" formControlName="privacyPolicy" tabindex="5" />
+          Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/privacy" routerLink="/legal/privacy" tabindex="-1">Privacy Policy</a>*
           @if (signupForm.get('privacyPolicy')?.invalid && signupForm.get('privacyPolicy')?.touched) {
             <div class="text-red-500">You must agree to the privacy policy to continue</div>
           }
@@ -102,8 +102,8 @@
 
       <div>
         <label>
-          <input type="checkbox" formControlName="termsOfService" />
-          Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/termsofservice" routerLink="/legal/termsofservice">Terms of Service</a>*
+          <input type="checkbox" formControlName="termsOfService" tabindex="6" />
+          Agree to <a class="text-blue-600 underline" target="_blank" href="/legal/termsofservice" routerLink="/legal/termsofservice" tabindex="-1">Terms of Service</a>*
           @if (signupForm.get('termsOfService')?.invalid && signupForm.get('termsOfService')?.touched) {
             <div class="text-red-500">You must agree to the terms and conditions to continue</div>
           }
@@ -112,13 +112,13 @@
 
       <div>
         <label>
-          <input type="checkbox" formControlName="signUpForMarketing">
+          <input type="checkbox" formControlName="signUpForMarketing" tabindex="7">
           Sign up for conversation tips, specials, invitations, and relevant content
         </label>
       </div>
 
       <div>
-        <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Sign up</button>
+        <button z-button zType="default" type="submit" tabindex="8" [disabled]="signupForm.invalid" class="flex w-full justify-center rounded-md bg-teal-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Sign up</button>
       </div>
     </form>
 

@@ -17,6 +17,7 @@ import { GameOverComponent } from '../game-over.component/game-over.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FeedbackComponent } from '../feedback.component/feedback.component';
+import { AutofocusDirective } from '@directives';
 
 @Component({
   selector: 'cu-chatterup',
@@ -31,6 +32,7 @@ import { FeedbackComponent } from '../feedback.component/feedback.component';
     DatePipe,
     AsyncPipe,
     NgIf,
+    AutofocusDirective,
   ],
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'

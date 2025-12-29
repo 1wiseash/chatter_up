@@ -89,7 +89,7 @@ rounded-2xl shadow-2xl flex flex-col h-[86vh]">
         <z-form-field class="flex-1">
             <z-form-control>
                 <input z-input placeholder="Type your response..."
-                        formControlName="message" autocomplete="off" />
+                        formControlName="message" autocomplete="off" cu-autofocus />
             </z-form-control>
         </z-form-field>
         <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || !gameRunning()"

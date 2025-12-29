@@ -8,6 +8,7 @@ import { toast } from 'ngx-sonner';
 import { ZardCardComponent } from '@shared/components/card/card.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { AutofocusDirective } from '@directives';
 
 @Component({
   selector: 'cu-landing-page',
@@ -17,7 +18,8 @@ import { RouterLink } from '@angular/router';
     ZardButtonComponent,
     ZardFormModule,
     ZardInputDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AutofocusDirective,
   ],
   templateUrl: 'landing-page.html',
   styles: `

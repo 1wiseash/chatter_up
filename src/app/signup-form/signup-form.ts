@@ -9,6 +9,7 @@ import { confirmPasswordValidator } from '@util';
 import { ZardPopoverComponent, ZardPopoverDirective } from '@shared/components/popover/popover.component';
 import { RouterLink } from '@angular/router';
 import { AuthService, SubscriptionService, UserService } from '@services';
+import { AutofocusDirective } from '@directives';
 
 
 @Component({
@@ -21,6 +22,7 @@ import { AuthService, SubscriptionService, UserService } from '@services';
     ZardPopoverComponent,
     ZardPopoverDirective,
     RouterLink,
+    AutofocusDirective,
   ],
   providers: [AuthService],
   templateUrl: './signup-form.html',
@@ -54,14 +56,19 @@ export class SignupForm {
       // console.log('New user created:', newUser);
       
       // Add a user data record (which updates UI user)
-      await this._userService.createUser(newUser.uid, this.signupForm.value.username as string);
-      this._router.navigate(['/', 'home']);
+      // NOTE: This would ideally be done via a Cloud Function triggered on user creation to avoid
+      // any race conditions or data inconsistencies, but the firebase cloud function doesn't allow listening
+      // to auth user creation events.
+      setTimeout(async () => {
+        await this._userService.createUser(newUser.uid, this.signupForm.value.username as string);
 
-      // Sign up for marketing if requested
-      if (this.signupForm.value.signUpForMarketing) {
-        await this._subscriptionService.signUp(this.signupForm.value.email);
-      }
-      
+        // Sign up for marketing if requested
+        if (this.signupForm.value.signUpForMarketing) {
+          await this._subscriptionService.signUp(this.signupForm.value.email as string);
+        }
+      }, 1);
+
+      this._router.navigate(['/', 'home']);
     } else {
       console.error('Valid form submitted with missing values:', this.signupForm.value);
     }

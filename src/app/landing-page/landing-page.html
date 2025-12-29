@@ -17,7 +17,7 @@
             <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="flex items-baseline mr-2">
                 <z-form-field class="flex-1">
                     <z-form-control>
-                        <input z-input type="email" placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
+                        <input z-input type="email" cu-autofocus placeholder="Enter email for conversation tips" formControlName="email" autocomplete="email"/>
                         @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
                             <z-form-message class="text-red-500">
                             @if (signupForm.get('email')?.errors?.['required']) {
@@ -30,7 +30,7 @@
                         }
                     </z-form-control>
                 </z-form-field>
-                <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md bg-teal-500 mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white hover:bg-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
+                <button z-button zType="default" type="submit" [disabled]="signupForm.invalid" class="justify-center rounded-md mr-1 ml-2 px-2 py-1.5 text-sm/6 font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 cursor-pointer">Subscribe!</button>
             </form>
         </div>
         <img 
@@ -181,7 +181,7 @@
         <div class="flex flex-col items-center bg-white rounded-2xl p-6 shadow-2xl border border-gray-200 max-w-sm">
             <h3 class="text-lg font-bold text-gray-900 mb-3 max-w-[175px] text-center">Ready to upgrade your conversations?</h3>
             <div class="space-y-3">
-                <a z-button routerLink="/signup" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm transition-colors">
+                <a z-button routerLink="/signup" class="w-full text-white px-6 py-2 rounded-lg font-semibold text-sm transition-colors">
                     Create Account
                 </a>
             </div>
