@@ -12,7 +12,7 @@
     
     <div class="grid md:grid-cols-3 gap-8">
         @for (env of gameEnvironments; track env.id) {
-        <div class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col items-center hover:scale-105">
+        <div (click)="startChatterUp(env.id)" class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col items-center hover:scale-105">
             <img 
                 src={{env.imageURL}} 
                 alt={{env.title}}
@@ -21,7 +21,7 @@
             <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center px-6">{{env.title}}</h3>
             <p class="text-gray-600 mb-4 px-6">{{env.description}}</p>
             <div class="flex-1"></div>
-            <button z-button (click)="startChatterUp(env.id)"
+            <button z-button
                 class="bg-teal-600 hover:bg-$teal-700 text-white py-3 px-4 m-6 rounded-lg font-semibold transition-colors"
             >
                 Start Practice Session

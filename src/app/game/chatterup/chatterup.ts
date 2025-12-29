@@ -17,6 +17,7 @@ import { GameOverComponent } from '../game-over.component/game-over.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FeedbackComponent } from '../feedback.component/feedback.component';
+import { AutofocusDirective } from '@directives';
 
 @Component({
   selector: 'cu-chatterup',
@@ -31,6 +32,7 @@ import { FeedbackComponent } from '../feedback.component/feedback.component';
     DatePipe,
     AsyncPipe,
     NgIf,
+    AutofocusDirective,
   ],
   templateUrl: './chatterup.html',
   styleUrl: './chatterup.css'
@@ -48,7 +50,10 @@ export class Chatterup implements OnDestroy, AfterContentInit {
 
   chatEnvironmentTitle = computed( () => _.find(environments, e => e.id === this.game().type)?.title);
 
-  autohideFeedback = this._userService.user.options?.autohideFeedback;
+  autohideFeedback$ = this._userService.user$.pipe(
+    map( user => user.options?.autohideFeedback || false ),
+    tap ( autohideFeedback => console.log('AutohideFeedback$ option is now:', autohideFeedback) ),
+  );
 
   private _elapsedTime = new BehaviorSubject(0);
   elapsedTime$ = this._elapsedTime.asObservable();
@@ -88,7 +93,7 @@ export class Chatterup implements OnDestroy, AfterContentInit {
             feedback: lastMessage.explanation || 'No feedback provided.',
             message: lastMessage.text,
             score: lastMessage.score,
-            autohideFeedback: this._userService.user.options?.autohideFeedback,
+            autohideFeedback: this._userService.user.options?.autohideFeedback || false,
           },
           zOkText: 'Got it',
           zOnOk: () => {
@@ -120,8 +125,7 @@ export class Chatterup implements OnDestroy, AfterContentInit {
   }
 
   toggleAutohide() {
-    this.autohideFeedback = !this.autohideFeedback;
-    this._userService.updateUser({options: {autohideFeedback: this.autohideFeedback}});
+    this._userService.updateUser({options: {autohideFeedback: !this._userService.user.options?.autohideFeedback}});
   }
 
   endGame() {

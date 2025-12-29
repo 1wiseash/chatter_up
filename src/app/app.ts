@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Header, Footer } from "@shared/index";
+import { Header } from "@shared/index";
 import { ZardToastComponent } from './_shared/components/toast/toast.component';
 // import { toast } from 'ngx-sonner';
 // import { ZardAlertDialogService } from './_shared/components/alert-dialog/alert-dialog.service';
 
 @Component({
   selector: 'cu-root',
-  imports: [RouterOutlet, Header, Footer, ZardToastComponent ],
+  imports: [RouterOutlet, Header, ZardToastComponent ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

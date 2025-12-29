@@ -62,7 +62,7 @@ rounded-2xl shadow-2xl flex flex-col h-[86vh]">
                                         </div>
                                         <label class="font-medium text-sm" for="autohideCheckbox">
                                             Auto-hide Feedback:
-                                            <input class="ml-2" type="checkbox" (click)="toggleAutohide()" id="autohideCheckbox" [checked]="autohideFeedback"/>
+                                            <input class="ml-2" type="checkbox" (click)="toggleAutohide()" id="autohideCheckbox" [checked]="autohideFeedback$ | async"/>
                                         </label>
                                     </z-popover>
                                 </ng-template>
@@ -89,7 +89,7 @@ rounded-2xl shadow-2xl flex flex-col h-[86vh]">
         <z-form-field class="flex-1">
             <z-form-control>
                 <input z-input placeholder="Type your response..."
-                        formControlName="message" autocomplete="off" />
+                        formControlName="message" autocomplete="off" cu-autofocus />
             </z-form-control>
         </z-form-field>
         <button z-button zType="default" type="submit" [disabled]="messageForm.invalid || !gameRunning()"

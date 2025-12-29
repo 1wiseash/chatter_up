@@ -17,6 +17,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { GameTypeComponent } from '@shared/game-type/game-type';
 import { UserProfileComponent } from '@shared/user-profile/user-profile.component';
+import { PaymentService } from '../_core/services/payment.service';
 
 @Component({
   selector: 'cu-home-page',
@@ -42,12 +43,20 @@ import { UserProfileComponent } from '@shared/user-profile/user-profile.componen
 export class HomePage implements OnInit {
     private readonly _gameService = inject(GameService);
     private readonly _userService = inject(UserService);
+    private readonly _paymentService = inject(PaymentService);
 
     user = toSignal(this._userService.user$) as Signal<User>;
     recentGames = signal<ChatterUpGame[]>([]);
     achievements = signal<Achievement[]>([]);
+    subscriptionUrl = signal<string>('');
 
     async ngOnInit() {
+        if (this._userService.user.stripeCustomerId) {
+            const portalSession = await this._paymentService.getBillingPortalSession('https://chatterup.net/home');
+            console.log('portalSession:', portalSession);
+            this.subscriptionUrl.set(portalSession.url);
+        }
+
         const games: ChatterUpGame[] = [];
         for (let gameId of this.user().chatterUpGames.slice(-10).reverse()) {
             try {

@@ -1,3 +1,5 @@
+import { MembershipType } from "@models";
+
 export const environment = {
     production: true,
     firebaseConfig: {
@@ -39,5 +41,25 @@ export const environment = {
     stripe: {
         publicKey: 'pk_live_NKcZnKGuuFH8Q8AU9C5cPYJB',
         secretName: 'stripe_private_key',
+        planIds: {
+            'Free': 'price_1SQ91wJcBOj7rqgxm2TAhwyV',
+            'Basic': 'price_1SMqhcJcBOj7rqgxxb3GVRfS',
+            'Premium': 'price_1SMqtDJcBOj7rqgxtjZQgyp1',
+        },
+        features: [
+            'no_credit_card',
+            'greatest_hits',
+            'all_environments',
+            'instant_scoring',
+            'unlimited_games',
+            'priority_support',
+            'special_events',
+            'redos',
+            'coach_suggestions',
+            'newsletter',
+            'game_history',
+            'progress_tracking',
+            'detailed_feedback',
+        ],
     },
 };

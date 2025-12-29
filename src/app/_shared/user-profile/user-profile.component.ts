@@ -56,7 +56,7 @@ export class UserProfileComponent implements OnInit {
         try {
             const profile = await this._userService.getUserProfile(this.userId);
             this.userProfile.set(profile);
-            this.avatarUrl.set(await this._userService.getAvatarUrl());
+            this.avatarUrl.set(await this._userService.getAvatarUrl(this.userId));
             this.isLoading.set(false);
             // Set a general success message if no specific status has been set during data fetching
             this.updateStatus(`Welcome back, ${profile.username}!`);

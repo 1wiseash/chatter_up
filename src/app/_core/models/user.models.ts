@@ -17,7 +17,7 @@ export enum SkillLevel {
 
 export interface User {
     id: string;
-    name?: string;
+    stripeCustomerId: string;
     username: string;
     chatterUpGames: string[];
     options?: {
@@ -30,12 +30,15 @@ export interface User {
         streakDays: {'business': number, 'dating': number, 'social': number},
     };
     membershipLevel: MembershipType;
+    stripePlanId: string; 
+    subscriptionStatus: string; 
 }
 
-export const DEFAULT_AVATAR = '/assets/img/logo.png';
+export const DEFAULT_AVATAR = '/assets/img/logo_nbg.png';
 
 export const DEFAULT_USER: User = {
     id: '',
+    stripeCustomerId: '',
     username: '',
     chatterUpGames: [],
     chatterUpStats: {
@@ -45,10 +48,13 @@ export const DEFAULT_USER: User = {
         streakDays: {'business': 0, 'dating': 0, 'social': 0},
     },
     membershipLevel: MembershipType.Free,
+    stripePlanId: '',
+    subscriptionStatus: 'inactive',
 }
 
 export const GUEST_USER: User = {
     id: '',
+    stripeCustomerId: '',
     username: 'guest',
     chatterUpGames: [],
     chatterUpStats: {
@@ -58,6 +64,8 @@ export const GUEST_USER: User = {
         streakDays: {'business': 0, 'dating': 0, 'social': 0},
     },
     membershipLevel: MembershipType.Free,
+    stripePlanId: '', 
+    subscriptionStatus: 'inactive', 
 }
 
 export interface UserProfile {

@@ -16,7 +16,7 @@ button.popular:hover {
 
 #most-popular-callout {
     position: relative;
-    top: -23px;
+    top: -10px;
     font-weight: 700;
     font-style: oblique;
 }
