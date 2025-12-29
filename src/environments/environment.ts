@@ -2,6 +2,8 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { MembershipPlans, MembershipType } from "@models";
+
 export const environment = {
     production: false,
     firebaseConfig: {
@@ -43,5 +45,20 @@ export const environment = {
     stripe: {
         publicKey: 'pk_test_FwGIQeNsaDdByaIg3Jfnvb3b',
         secretName: 'stripe_private_key',
+        planIds: {
+            'Free': 'price_1SWS4VJcBOj7rqgxCPbo7Osu',
+            'Basic': 'price_1SOhsxJcBOj7rqgxWUYtNVut',
+            'Premium': 'price_1SWS5tJcBOj7rqgxHoMkOVQk',
+        },
+        features: [
+            'free-feature-1',
+            'free-feature-2',
+            'basic-feature-1',
+            'basic-feature-2',
+            'basic-feature-3',
+            'premium-feature-1',
+            'premium-feature-2',
+            'premium-feature-3',
+        ],
     },
 };

@@ -44,7 +44,7 @@ export class PaymentComponent implements OnInit {
   cardElement!: any;
 
   personalInfoForm = new FormGroup({
-      name: new FormControl(this._userService.user.name || '', [Validators.required, Validators.minLength(3)]),
+      name: new FormControl('', [Validators.required, Validators.minLength(3)]),
       email: new FormControl(this._authService.email || '', [Validators.required, Validators.email]),
   });
 
@@ -123,7 +123,7 @@ export class PaymentComponent implements OnInit {
   }
 
   async getPlanInfo() {
-    return this._paymentService.getPlanDetails(this.plan.stripePlanTestId as string)
+    return this._paymentService.getPlanDetails(this.plan)
       .then((response) => {
         this.changeLoadingState(false);
 
@@ -153,6 +153,7 @@ export class PaymentComponent implements OnInit {
 
     this.cardElement = elements.create("card", { style: style });
     this.cardElement.mount("#card-element");
+
     // Element focus ring
     this.cardElement.on("focus", () => {
       const el = document.getElementById(`${this.cardElement._componentName}-element`) as HTMLElement;
@@ -171,6 +172,7 @@ export class PaymentComponent implements OnInit {
         this.errorMessage.set("");
       }
     });
+    
   }
 
   showPriceDetails(plan: any) {

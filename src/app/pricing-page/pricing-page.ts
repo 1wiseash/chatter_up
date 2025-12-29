@@ -28,7 +28,6 @@ export class PricingPage {
       zData: {plan},
       zOkText: 'Close',
     });
-    // const updated = await this._membershipService.purchaseMembership(plan)
     // toast('Changed to ' + plan.name);
   }
 

@@ -10,6 +10,9 @@
       <p class="text-xl text-gray-600">
         Membership Level: <a routerLink="/pricing" class="underline text-blue-600">{{user().membershipLevel | membershipLevel}}</a>
       </p>
+      <p class="text-xl text-gray-600">
+        Manage Subscription: <a href="{{subscriptionUrl()}}" class="underline text-blue-600">Subscription Portal</a>
+      </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

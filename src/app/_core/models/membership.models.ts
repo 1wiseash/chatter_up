@@ -1,13 +1,11 @@
 export enum MembershipType {
     Free,
-    Paid,
+    Basic,
     Premium,
 }
 
 export interface MembershipInfo {
     id: MembershipType;
-    stripePlanId?: string;
-    stripePlanTestId?: string;
     name: string;
     monthlyPrice: number;
     description: string;
@@ -25,10 +23,8 @@ export const MembershipPlans: MembershipInfo[] = [{
         popular: false,
         comingSoon: false,
     }, {
-        id: MembershipType.Paid,
-        stripePlanId: 'price_1SMqhcJcBOj7rqgxxb3GVRfS',
-        stripePlanTestId: 'price_1SOhsxJcBOj7rqgxWUYtNVut',
-        name: 'Paid',
+        id: MembershipType.Basic,
+        name: 'Basic',
         monthlyPrice: 4.99,
         description: 'Detailed coach feedback',
         features: ['Everything in Free', '3-day free trial', 'Detailed score explanations', 'Personal progress tracking', 'Conversation history', 'Weekly tips newsletter'],
@@ -36,11 +32,10 @@ export const MembershipPlans: MembershipInfo[] = [{
         comingSoon: false,
     }, {
         id: MembershipType.Premium,
-        stripePlanId: 'price_1SMqtDJcBOj7rqgxtjZQgyp1',
         name: 'Premium',
         monthlyPrice: 7.49,
         description: 'Access to all features',
-        features: ['Everything in Paid Member', 'Coach suggestions upon request', 'Conversation Rewinds', 'Invitations to special events', 'Priority support'],
+        features: ['Everything in Basic', 'Coach suggestions upon request', 'Conversation Rewinds', 'Invitations to special events', 'Priority support'],
         popular: false,
         comingSoon: true,
     }

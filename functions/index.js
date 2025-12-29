@@ -98,7 +98,9 @@ setGlobalOptions({maxInstances: 10});
 const GAMES_COLLECTION = "chatter_up_games";
 const GREATEST_HITS_COLLECTION = "greatest_hits";
 const USER_PROFILES_COLLECTION = "user_profiles";
+const USERS_COLLECTION = "users";
 const HALL_OF_FAME_COLLECTION = "hall_of_fame";
+const INVOICES_COLLECTION = "invoices";
 
 const getGreatHitCollectionPath = (gameType) => {
   return `${GREATEST_HITS_COLLECTION}/${gameType}/games`;
@@ -522,7 +524,7 @@ exports.getFeedback = onCall(async (request) => {
  * @return {Promise<string>} secret key
  */
 async function initializeStripe() {
-  const stripeSecretKey = await getSecret(firebaseConfig.messagingSenderId, stripeInfo.STRIPE_TEST_SECRET_KEY_NAME);
+  const stripeSecretKey = await getSecret(firebaseConfig.messagingSenderId, stripeInfo.STRIPE_SECRET_KEY_NAME);
 
   const stripe = stripeLib(stripeSecretKey, {
     apiVersion: "2020-08-27",
@@ -547,7 +549,7 @@ exports.getPlanDetails = onCall(async (request, response) => {
     );
   }
 
-  // Get the sessionId from the client-side request
+  // Get the planId from the client-side request
   const planId = request.data.planId;
   if (!planId) {
     throw new HttpsError(
@@ -560,7 +562,7 @@ exports.getPlanDetails = onCall(async (request, response) => {
     const stripe = await initializeStripe();
     const plan = await stripe.plans.retrieve(planId);
     return {
-      publishableKey: stripeInfo.STRIPE_TEST_PUBLISHABLE_KEY,
+      publishableKey: stripeInfo.STRIPE_PUBLISHABLE_KEY,
       plan,
     };
   } catch (error) {
@@ -681,11 +683,90 @@ exports.createStripeSubscription = onCall(async (request, response) => {
   }
 });
 
+
+/**
+ * Callable function to get a Stripe customer's entitlements
+ */
+exports.getStripeCustomerEntitlements = onCall(async (request, response) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the customerId from the client-side request
+  const customerId = request.data.customerId;
+  if (!customerId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a customerId.",
+    );
+  }
+
+  try {
+    const stripe = await initializeStripe();
+    const activeEntitlements = await stripe.entitlements.activeEntitlements.list({
+      customer: customerId,
+    });
+    return activeEntitlements;
+  } catch (error) {
+    console.error("Error in getStripeCustomerEntitlements:", error);
+    throw error;
+  }
+});
+
+/**
+ * Callable function to configure Stripe Billing Portal session
+ */
+exports.createBillingPortalSession = onCall(async (request, response) => {
+  // Validate that the request came from an authenticated user.
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+    );
+  }
+
+  // Get the customerId from the client-side request
+  const customerId = request.data.customerId;
+  if (!customerId) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a customerId.",
+    );
+  }
+
+  // Get the returnUrl from the client-side request
+  const returnUrl = request.data.returnUrl;
+  if (!returnUrl) {
+    throw new HttpsError(
+        "invalid-argument",
+        "The function must be called with a returnUrl.",
+    );
+  }
+
+  try {
+    const stripe = await initializeStripe();
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl,
+    });
+    return session;
+  } catch (error) {
+    console.error("Error creating Billing Portal session:", error);
+    throw error;
+  }
+});
+
 /**
  * Webhooks endpoint to handle Stripe events
  */
 exports.stripeWebhook = onRequest(async (request, response) => {
-  const webhookSecret = await exports.getSecret(firebaseConfig.messagingSenderId, stripeInfo.WHS_NAME);
+  // const webhookSecret = "whsec_6f83d8be450c0b4401e95c6829efbf8403491af37e5992e844679aca22615f18";
+  const webhookSecret = await getSecret(firebaseConfig.messagingSenderId, stripeInfo.WHS_NAME);
 
   // Retrieve the event by verifying the signature using the raw body and secret.
   let event;
@@ -698,11 +779,16 @@ exports.stripeWebhook = onRequest(async (request, response) => {
         webhookSecret,
     );
   } catch (err) {
-    console.error(`⚠️  Webhook signature verification failed.`);
-    return response.sendStatus(400);
+    console.error(`⚠️  Webhook signature verification failed.`, err);
+    return response.status(400).send(`Webhook Error: ${err.message}`);
   }
+
   // Extract the object from the event.
   const dataObject = event.data.object;
+  console.log("Received Stripe event with data object:", dataObject);
+
+  const context = event.context;
+  console.log("Event context:", context);
 
   // Handle the event
   // Review important events for Billing webhooks
@@ -712,9 +798,53 @@ exports.stripeWebhook = onRequest(async (request, response) => {
     case "customer.created":
       console.log(`✅ Successfully created customer: ${dataObject.id}`);
       break;
-    case "customer.updated":
-      // console.log(dataObject);
+    case "customer.deleted":
+      console.log(`✅ Successfully deleted customer: ${dataObject.id}`);
       break;
+    case "checkout.session.completed": {
+      // Payment is successful and the subscription is created.
+      const userRef = db.collection(USERS_COLLECTION).doc(dataObject.client_reference_id);
+
+      // You should provision the subscription and save the customer ID to your database.
+      const customerId = dataObject.customer;
+      const stripe = await initializeStripe();
+      const subscription = await stripe.Subscription.retrieve(dataObject.subscription);
+      const planId = subscription.items.data[0].price.id;
+
+      await userRef.update({
+        stripeCustomerId: customerId,
+        stripePlanId: planId,
+        subscriptionStatus: subscription.status,
+      });
+      console.log(`✅ Checkout session completed for customer: ${customerId}`);
+      break;
+    }
+    case "invoice.paid": {
+      // Continue to provision the subscription as payments continue to be made.
+      // Store the status in your database and check when a user accesses your service.
+      // This approach helps you avoid hitting rate limits.
+      const invoiceRef = db.collection(INVOICES_COLLECTION).doc(dataObject.id);
+      await invoiceRef.set({
+        id: dataObject.id,
+        customerId: dataObject.customer,
+        amountPaid: dataObject.amount_paid,
+        status: dataObject.status,
+        created: dataObject.created,
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      // The payment failed or the customer doesn't have a valid payment method.
+      // The subscription becomes past_due. Notify your customer and send them to the
+      // customer portal to update their payment information.
+      const user = await db.collection(USERS_COLLECTION).where("stripeId", "==", dataObject.customer).get();
+      if (!user.empty) {
+        const userDoc = user.docs[0];
+        await userDoc.ref.update({subscriptionStatus: "past_due"});
+        console.log(`⚠️  Payment failed for customer: ${dataObject.customer}, user ID: ${userDoc.id}`);
+      }
+      break;
+    }
     case "setup_intent.created":
       // console.log(dataObject);
       break;
@@ -730,15 +860,28 @@ exports.stripeWebhook = onRequest(async (request, response) => {
     case "invoice.payment_succeeded":
       console.log(dataObject);
       break;
-    case "invoice.payment_failed":
-      console.log(dataObject);
-      break;
     case "customer.subscription.created":
       console.log(`✅ Successfully created subscription: ${dataObject.id}`);
       break;
+    case "customer.subscription.deleted": {
+      console.log(`✅ Successfully deleted subscription: ${dataObject.id}`);
+
+      // Subscription was canceled.
+      const userRef = db.collection(USERS_COLLECTION).doc(dataObject.client_reference_id);
+
+      // You should provision the subscription and save the customer ID to your database.
+      const customerId = dataObject.customer;
+      const stripe = await initializeStripe();
+      const subscription = await stripe.Subscription.retrieve(dataObject.subscription);
+      const planId = subscription.items.data[0].price.id;
+
+      await userRef.update({stripePlanId: planId, subscriptionStatus: subscription.status});
+      console.log(`✅ Subscription canceled for customer: ${customerId}`);
+      break;
+    }
     // ... handle other event types
     default:
-      console.warn("Unexpected event:", event);
+      console.warn("Unexpected event:", event, "data object:", dataObject);
   }
-  response.sendStatus(200);
+  return {received: true};
 });
